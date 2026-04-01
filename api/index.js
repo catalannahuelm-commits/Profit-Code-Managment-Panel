@@ -255,6 +255,150 @@ module.exports = async (req, res) => {
       return res.json(data || []);
     }
 
+    // PROFILE
+    if (parts[0] === 'profile') {
+      // Notes sub-route
+      if (parts[1] === 'notes') {
+        const u = auth(req, res); if (!u) return;
+        if (!parts[2]) {
+          if (method === 'GET') {
+            const { data } = await supabase.from('user_notes').select('*').eq('user_id', u.id).order('updated_at', { ascending: false });
+            return res.json(data || []);
+          }
+          if (method === 'POST') {
+            const { title, content, color } = req.body;
+            const { data } = await supabase.from('user_notes').insert({ user_id: u.id, title: title || '', content: content || '', color: color || '#7B6CF6' }).select().single();
+            return res.status(201).json(data);
+          }
+        } else {
+          if (method === 'PUT') {
+            const updates = {};
+            ['title','content','color'].forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+            updates.updated_at = new Date().toISOString();
+            const { data } = await supabase.from('user_notes').update(updates).eq('id', parts[2]).eq('user_id', u.id).select().single();
+            return res.json(data);
+          }
+          if (method === 'DELETE') {
+            await supabase.from('user_notes').delete().eq('id', parts[2]).eq('user_id', u.id);
+            return res.json({ ok: true });
+          }
+        }
+      }
+      // Avatar
+      if (parts[1] === 'avatar' && method === 'POST') {
+        const u = auth(req, res); if (!u) return;
+        return res.json({ avatar: null, message: 'Avatar upload not supported on serverless' });
+      }
+      // Password
+      if (parts[1] === 'password' && method === 'PUT') {
+        const u = auth(req, res); if (!u) return;
+        const { current, password } = req.body;
+        if (!current || !password) return res.status(400).json({ error: 'Contraseñas requeridas' });
+        const { data: users } = await supabase.from('users').select('password_hash').eq('id', u.id).limit(1);
+        if (!users?.length || !await bcrypt.compare(current, users[0].password_hash)) return res.status(400).json({ error: 'Contraseña actual incorrecta' });
+        const hash = await bcrypt.hash(password, 10);
+        await supabase.from('users').update({ password_hash: hash }).eq('id', u.id);
+        return res.json({ ok: true });
+      }
+      // Profile GET/PUT
+      if (!parts[1]) {
+        const u = auth(req, res); if (!u) return;
+        if (method === 'GET') {
+          const { data } = await supabase.from('users').select('id, name, email, role, phone, bio, avatar, created_at').eq('id', u.id).single();
+          return res.json(data);
+        }
+        if (method === 'PUT') {
+          const updates = {};
+          ['name','email','phone','bio'].forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+          const { data } = await supabase.from('users').update(updates).eq('id', u.id).select('id, name, email, role, phone, bio, avatar, created_at').single();
+          return res.json(data);
+        }
+      }
+    }
+
+    // BADGES
+    if (parts[0] === 'badges') {
+      const AUTO_BADGES = [
+        { key: 'first_task', title: 'Primera Tarea', desc: 'Completaste tu primera tarea', icon: '🎯', color: '#7B6CF6', tier: 'bronze' },
+        { key: 'task_5', title: 'Productivo', desc: 'Completaste 5 tareas', icon: '⚡', color: '#F5A623', tier: 'bronze' },
+        { key: 'task_10', title: 'Máquina', desc: 'Completaste 10 tareas', icon: '🔥', color: '#E74C3C', tier: 'silver' },
+        { key: 'task_25', title: 'Imparable', desc: 'Completaste 25 tareas', icon: '💎', color: '#00CEC9', tier: 'gold' },
+        { key: 'first_client', title: 'Primer Cliente', desc: 'Agregaste tu primer cliente', icon: '🤝', color: '#1DB954', tier: 'bronze' },
+        { key: 'clients_5', title: 'Networker', desc: 'Tenés 5 clientes', icon: '🌐', color: '#4A90D9', tier: 'silver' },
+        { key: 'first_invoice', title: 'Primer Cobro', desc: 'Cobraste tu primera factura', icon: '💰', color: '#1DB954', tier: 'bronze' },
+        { key: 'first_project', title: 'Primer Proyecto', desc: 'Creaste tu primer proyecto', icon: '📁', color: '#4A90D9', tier: 'bronze' },
+      ];
+
+      // GET catalog
+      if (parts[1] === 'catalog') return res.json(AUTO_BADGES);
+
+      // GET user badges
+      if (parts[1] === 'user') {
+        const u = auth(req, res); if (!u) return;
+        const userId = parts[2] || u.id;
+        const [autoRes, manualRes] = await Promise.all([
+          supabase.from('user_badges').select('badge_key, unlocked_at').eq('user_id', userId),
+          supabase.from('manual_badges').select('*, users!manual_badges_given_by_fkey(name)').eq('user_id', userId).order('created_at', { ascending: false })
+        ]);
+        const unlocked = (autoRes.data || []).map(b => {
+          const def = AUTO_BADGES.find(d => d.key === b.badge_key);
+          return def ? { ...def, unlocked_at: b.unlocked_at, type: 'auto' } : null;
+        }).filter(Boolean);
+        const manual = (manualRes.data || []).map(b => ({
+          id: b.id, title: b.title, icon: b.icon, color: b.color, reason: b.reason,
+          given_by_name: b.users?.name || '?', created_at: b.created_at, type: 'manual'
+        }));
+        return res.json({ unlocked, manual, catalog: AUTO_BADGES });
+      }
+
+      // POST check badges
+      if (parts[1] === 'check' && method === 'POST') {
+        const u = auth(req, res); if (!u) return;
+        const [tasksRes, clientsRes, invoicesRes, projectsRes, existingRes] = await Promise.all([
+          supabase.from('tasks').select('id').eq('assigned_to', u.id).eq('status', 'done'),
+          supabase.from('clients').select('id'),
+          supabase.from('invoices').select('id').eq('status', 'paid'),
+          supabase.from('projects').select('id'),
+          supabase.from('user_badges').select('badge_key').eq('user_id', u.id)
+        ]);
+        const tasksDone = tasksRes.data?.length || 0;
+        const clientCount = clientsRes.data?.length || 0;
+        const paidCount = invoicesRes.data?.length || 0;
+        const projectCount = projectsRes.data?.length || 0;
+        const existing = new Set((existingRes.data || []).map(b => b.badge_key));
+        const newBadges = [];
+        const checks = [
+          [tasksDone >= 1, 'first_task'], [tasksDone >= 5, 'task_5'], [tasksDone >= 10, 'task_10'], [tasksDone >= 25, 'task_25'],
+          [clientCount >= 1, 'first_client'], [clientCount >= 5, 'clients_5'],
+          [paidCount >= 1, 'first_invoice'], [projectCount >= 1, 'first_project']
+        ];
+        for (const [cond, key] of checks) {
+          if (cond && !existing.has(key)) {
+            await supabase.from('user_badges').insert({ user_id: u.id, badge_key: key });
+            const def = AUTO_BADGES.find(b => b.key === key);
+            if (def) newBadges.push(def);
+          }
+        }
+        return res.json({ new: newBadges, total: newBadges.length });
+      }
+
+      // POST give manual badge
+      if (parts[1] === 'give' && method === 'POST') {
+        const u = owner(req, res); if (!u) return;
+        const { user_id, title, icon, color, reason } = req.body;
+        if (!user_id || !title) return res.status(400).json({ error: 'Usuario y título requeridos' });
+        const { data } = await supabase.from('manual_badges').insert({ user_id, given_by: u.id, title, icon: icon || '⭐', color: color || '#F5A623', reason }).select().single();
+        return res.json(data);
+      }
+
+      // DELETE manual badge
+      if (parts[1] === 'manual' && parts[2] && method === 'DELETE') {
+        const u = owner(req, res); if (!u) return;
+        await supabase.from('manual_badges').delete().eq('id', parts[2]);
+        return res.json({ ok: true });
+      }
+    }
+
     return res.status(404).json({ error: 'Not found' });
   } catch (err) {
     console.error(err);
