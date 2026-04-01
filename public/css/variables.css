@@ -127,6 +127,14 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+input[type="time"] {
+  -webkit-appearance: none;
+}
+
 /* GPU acceleration hints */
 .app-orb, .orb, .particle {
   will-change: transform;

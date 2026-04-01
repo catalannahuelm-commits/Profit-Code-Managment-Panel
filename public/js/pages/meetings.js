@@ -220,6 +220,25 @@ window.Pages.meetings.delete = async function(id) {
   showToast(t('meetings_deleted'));
 };
 
+function setupTimeInput(input) {
+  input.addEventListener('input', () => {
+    let v = input.value.replace(/[^0-9]/g, '');
+    if (v.length >= 2) v = v.slice(0, 2) + ':' + v.slice(2);
+    if (v.length > 5) v = v.slice(0, 5);
+    input.value = v;
+  });
+  input.addEventListener('blur', () => {
+    const parts = input.value.split(':');
+    if (parts.length === 2) {
+      let h = parseInt(parts[0]) || 0;
+      let m = parseInt(parts[1]) || 0;
+      if (h > 23) h = 23;
+      if (m > 59) m = 59;
+      input.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+  });
+}
+
 window.Pages.meetings.openNew = async function() {
   if (!_teamMembers.length) {
     _teamMembers = await API.request('GET', '/api/team/workload');
@@ -237,6 +256,8 @@ window.Pages.meetings.openNew = async function() {
   document.getElementById('form-meeting').reset();
   document.getElementById('modal-meeting').classList.add('active');
   initDatePickers(document.getElementById('modal-meeting'));
+  setupTimeInput(document.getElementById('meeting-time-start'));
+  setupTimeInput(document.getElementById('meeting-time-end'));
 
   document.getElementById('form-meeting').onsubmit = async (e) => {
     e.preventDefault();
