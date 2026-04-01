@@ -2793,11 +2793,11 @@ tr:hover {
   font-size: 1.6rem;
   font-weight: 700;
   width: fit-content;
-  background: linear-gradient(135deg, #FFFFFF 0%, #C4B5FD 50%, #7B6CF6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   position: relative;
+  color: transparent;
+  background-image: linear-gradient(135deg, #FFFFFF 0%, #C4B5FD 50%, #7B6CF6 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .greeting-title::after {
@@ -2807,16 +2807,13 @@ tr:hover {
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #7B6CF6, transparent);
+  background-image: linear-gradient(90deg, #7B6CF6, transparent);
   border-radius: 2px;
   opacity: 0.5;
 }
 
 [data-theme="light"] .greeting-title {
-  background: linear-gradient(135deg, #1A1A2E 0%, #7B6CF6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background-image: linear-gradient(135deg, #1A1A2E 0%, #7B6CF6 100%);
 }
 
 /* === DASHBOARD ENHANCED === */
