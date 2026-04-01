@@ -3,6 +3,7 @@
 window.currentUser = null;
 window._currentPage = null;
 const _pageCache = {};
+const _appVersion = '2';
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -116,7 +117,7 @@ function showApp() {
       ? ['pipeline','clients','projects','tasks','invoices','expenses','meetings','team','profile']
       : ['profile'];
     pages.forEach(p => {
-      if (!_pageCache[p]) fetch(`/pages/${p}.html`).then(r => r.ok ? r.text() : '').then(html => { if (html) _pageCache[p] = html; });
+      if (!_pageCache[p]) fetch(`/pages/${p}.html?v=${_appVersion}`).then(r => r.ok ? r.text() : '').then(html => { if (html) _pageCache[p] = html; });
     });
   }, 2000);
 }
@@ -157,7 +158,7 @@ async function navigateTo(page) {
   const content = document.getElementById('main-content');
   try {
     if (!_pageCache[page]) {
-      const res = await fetch(`/pages/${page}.html`);
+      const res = await fetch(`/pages/${page}.html?v=${_appVersion}`);
       if (res.ok) _pageCache[page] = await res.text();
     }
     if (_pageCache[page]) {
