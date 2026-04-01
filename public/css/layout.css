@@ -635,29 +635,9 @@
   box-shadow: 0 6px 24px rgba(123, 108, 246, 0.6);
 }
 
-/* Floating tooltip on hover */
+/* No CSS tooltip — JS handles it */
 .sidebar-nav a::after {
-  content: attr(data-tooltip);
-  position: fixed;
-  left: 72px;
-  background: var(--bg-elevated, #1a1030);
-  color: var(--text);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16,1,0.3,1);
-  transform: translateX(-6px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(123,108,246,0.15);
-  z-index: 9999;
-}
-
-.sidebar-nav a:hover::after {
-  opacity: 1;
-  transform: translateX(0);
+  display: none;
 }
 
 .sidebar-help {

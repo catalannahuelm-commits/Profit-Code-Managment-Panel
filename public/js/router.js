@@ -3,7 +3,7 @@
 window.currentUser = null;
 window._currentPage = null;
 const _pageCache = {};
-const _appVersion = '7';
+const _appVersion = '8';
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -90,6 +90,9 @@ function showApp() {
       navigateTo(link.dataset.page);
     });
   });
+
+  // Sidebar tooltips — positioned with JS, never off-screen
+  setupSidebarTooltips(navContainer);
 
   // Language selector in sidebar
   const langContainer = document.getElementById('sidebar-lang');
@@ -183,6 +186,40 @@ async function navigateTo(page) {
         <p>Error</p>
       </div>`;
   }
+}
+
+// Sidebar tooltips
+function setupSidebarTooltips(container) {
+  let tip = document.getElementById('sidebar-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'sidebar-tip';
+    tip.className = 'sidebar-tooltip';
+    document.body.appendChild(tip);
+  }
+
+  container.querySelectorAll('a[data-tooltip]').forEach(link => {
+    link.addEventListener('mouseenter', () => {
+      const text = link.dataset.tooltip;
+      tip.textContent = text;
+      tip.classList.add('visible');
+
+      const rect = link.getBoundingClientRect();
+      const tipH = tip.offsetHeight;
+      let top = rect.top + rect.height / 2 - tipH / 2;
+
+      // Keep within viewport
+      if (top < 8) top = 8;
+      if (top + tipH > window.innerHeight - 8) top = window.innerHeight - tipH - 8;
+
+      tip.style.left = (rect.right + 12) + 'px';
+      tip.style.top = top + 'px';
+    });
+
+    link.addEventListener('mouseleave', () => {
+      tip.classList.remove('visible');
+    });
+  });
 }
 
 // Login form

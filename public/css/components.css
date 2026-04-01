@@ -2790,6 +2790,56 @@ tr:hover {
   display: none !important;
 }
 
+/* === SIDEBAR TOOLTIP === */
+.sidebar-tooltip {
+  position: fixed;
+  background: var(--bg-elevated, #1a1030);
+  color: var(--text-heading);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:
+    0 8px 30px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(123,108,246,0.2),
+    0 0 20px rgba(123,108,246,0.08);
+  letter-spacing: 0.02em;
+}
+
+.sidebar-tooltip.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sidebar-tooltip::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: var(--bg-elevated, #1a1030);
+  border-left: 1px solid rgba(123,108,246,0.2);
+  border-bottom: 1px solid rgba(123,108,246,0.2);
+}
+
+[data-theme="light"] .sidebar-tooltip {
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .sidebar-tooltip::before {
+  background: #fff;
+  border-color: rgba(0,0,0,0.06);
+}
+
 /* === GREETING TITLE === */
 .greeting-title {
   font-size: 1.6rem;
