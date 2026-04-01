@@ -130,6 +130,12 @@ const API = {
   giveBadge(data) { return this.request('POST', '/api/badges/give', data); },
   deleteManualBadge(id) { return this.request('DELETE', `/api/badges/manual/${id}`); },
 
+  // Meetings
+  getMeetings() { return this.request('GET', '/api/meetings'); },
+  createMeeting(data) { return this.request('POST', '/api/meetings', data); },
+  updateMeeting(id, data) { return this.request('PUT', `/api/meetings/${id}`, data); },
+  deleteMeeting(id) { return this.request('DELETE', `/api/meetings/${id}`); },
+
   // Notes
   getNotes() { return this.request('GET', '/api/profile/notes'); },
   createNote(data) { return this.request('POST', '/api/profile/notes', data); },

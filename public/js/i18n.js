@@ -294,6 +294,20 @@ const I18N = {
     profile_member_since: 'Miembro desde {date}',
     profile_given_by: 'por {name}',
 
+    // Meetings
+    nav_meetings: 'Reuniones',
+    page_meetings: 'Reuniones',
+    page_meetings_sub: 'Agenda y calendario de reuniones',
+    meetings_total: 'Total',
+    meetings_today: 'Hoy',
+    meetings_this_week: 'Esta Semana',
+    meetings_this_month: 'Este Mes',
+    meetings_upcoming: 'Próximas reuniones',
+    meetings_empty: 'No hay reuniones',
+    meetings_new: '+ Nueva Reunión',
+    meetings_created: 'Reunión creada',
+    meetings_deleted: 'Reunión eliminada',
+
     // Language
     lang_label: 'Idioma',
   },
@@ -575,6 +589,19 @@ const I18N = {
     profile_member_since: 'Member since {date}',
     profile_given_by: 'by {name}',
 
+    nav_meetings: 'Meetings',
+    page_meetings: 'Meetings',
+    page_meetings_sub: 'Meeting schedule and calendar',
+    meetings_total: 'Total',
+    meetings_today: 'Today',
+    meetings_this_week: 'This Week',
+    meetings_this_month: 'This Month',
+    meetings_upcoming: 'Upcoming meetings',
+    meetings_empty: 'No meetings',
+    meetings_new: '+ New Meeting',
+    meetings_created: 'Meeting created',
+    meetings_deleted: 'Meeting deleted',
+
     lang_label: 'Language',
   },
 
@@ -854,6 +881,19 @@ const I18N = {
     profile_no_badges: 'Nenhuma insígnia desbloqueada',
     profile_member_since: 'Membro desde {date}',
     profile_given_by: 'por {name}',
+
+    nav_meetings: 'Reuniões',
+    page_meetings: 'Reuniões',
+    page_meetings_sub: 'Agenda e calendário de reuniões',
+    meetings_total: 'Total',
+    meetings_today: 'Hoje',
+    meetings_this_week: 'Esta Semana',
+    meetings_this_month: 'Este Mês',
+    meetings_upcoming: 'Próximas reuniões',
+    meetings_empty: 'Nenhuma reunião',
+    meetings_new: '+ Nova Reunião',
+    meetings_created: 'Reunião criada',
+    meetings_deleted: 'Reunião excluída',
 
     lang_label: 'Idioma',
   }

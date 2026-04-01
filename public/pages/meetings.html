@@ -1,0 +1,71 @@
+<div class="meetings-page">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+    <button class="btn btn-primary" id="btn-new-meeting" onclick="Pages.meetings.openNew()">+ Nueva Reunión</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="meetings-kpi-grid" id="meetings-kpis"></div>
+
+  <div class="meetings-layout">
+    <!-- Calendar -->
+    <div class="meetings-calendar-card">
+      <div class="cal-header">
+        <button class="cal-nav" id="cal-prev" onclick="Pages.meetings.prevMonth()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h3 id="cal-month-label">...</h3>
+        <button class="cal-nav" id="cal-next" onclick="Pages.meetings.nextMonth()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="cal-weekdays" id="cal-weekdays"></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend" id="cal-legend"></div>
+    </div>
+
+    <!-- Upcoming meetings list -->
+    <div class="meetings-list-card">
+      <h3 id="meetings-list-title">Próximas reuniones</h3>
+      <div id="meetings-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal nueva reunión -->
+  <div class="modal-overlay" id="modal-meeting">
+    <div class="modal">
+      <h2 id="meeting-modal-title">Nueva Reunión</h2>
+      <form id="form-meeting">
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" id="meeting-title" required placeholder="Ej: Revisión de proyecto">
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="meeting-date" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label>Hora inicio</label>
+            <input type="time" id="meeting-time-start">
+          </div>
+          <div class="form-group">
+            <label>Hora fin</label>
+            <input type="time" id="meeting-time-end">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Asistentes</label>
+          <div id="meeting-attendees-picker" class="attendees-picker"></div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="meeting-description" rows="2" placeholder="Notas sobre la reunión..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-meeting').classList.remove('active')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear Reunión</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

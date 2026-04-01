@@ -267,6 +267,41 @@ module.exports = async (req, res) => {
       }));
     }
 
+    // ========== MEETINGS ==========
+    if (parts[0] === 'meetings') {
+      if (!parts[1]) {
+        if (method === 'GET') {
+          const u = auth(req, res); if (!u) return;
+          const { data } = await supabase.from('meetings').select('*, users!meetings_user_id_fkey(name)').eq('org_id', u.org_id).order('date', { ascending: true });
+          return res.json((data || []).map(m => ({ ...m, user_name: m.users?.name, users: undefined })));
+        }
+        if (method === 'POST') {
+          const u = auth(req, res); if (!u) return;
+          const { title, description, date, time_start, time_end, attendees } = req.body;
+          if (!title || !date) return res.status(400).json({ error: 'Título y fecha requeridos' });
+          const { data } = await supabase.from('meetings').insert({
+            org_id: u.org_id, user_id: u.id, title, description,
+            date, time_start: time_start || null, time_end: time_end || null,
+            attendees: attendees || []
+          }).select().single();
+          return res.status(201).json(data);
+        }
+      } else {
+        if (method === 'PUT') {
+          const u = auth(req, res); if (!u) return;
+          const updates = {};
+          ['title','description','date','time_start','time_end','attendees'].forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+          const { data } = await supabase.from('meetings').update(updates).eq('id', parts[1]).eq('org_id', u.org_id).select().single();
+          return res.json(data);
+        }
+        if (method === 'DELETE') {
+          const u = auth(req, res); if (!u) return;
+          await supabase.from('meetings').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+          return res.json({ ok: true });
+        }
+      }
+    }
+
     // ========== NOTIFICATIONS ==========
     if (parts[0] === 'notifications') {
       const u = auth(req, res); if (!u) return;
