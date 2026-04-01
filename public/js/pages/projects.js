@@ -10,6 +10,10 @@ function getProjectStatus() {
 }
 
 window.Pages.projects = async function() {
+  var grid = document.getElementById('projects-grid');
+  if (grid && !grid.children.length) grid.innerHTML = '<div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div>';
+  var kpis = document.getElementById('projects-kpis');
+  if (kpis && !kpis.children.length) kpis.innerHTML = '<div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div>';
   try {
     _allProjects = await API.getProjects();
     renderProjectsKPIs(_allProjects);

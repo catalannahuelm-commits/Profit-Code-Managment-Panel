@@ -6,6 +6,11 @@ const DASHBOARD_KPIS = [
 ];
 
 window.Pages.dashboard = async function() {
+  // Show skeleton immediately
+  const kpiContainer = document.getElementById('dashboard-kpis');
+  if (kpiContainer && !kpiContainer.children.length) {
+    kpiContainer.innerHTML = '<div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div>';
+  }
   try {
     const data = await API.getDashboard();
 

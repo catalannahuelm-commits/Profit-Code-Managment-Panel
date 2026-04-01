@@ -9,6 +9,8 @@ function getInvStatus() {
 let _allInvoices = [];
 
 window.Pages.invoices = async function() {
+  var list = document.getElementById('invoices-list');
+  if (list && !list.children.length) list.innerHTML = '<div class="sk sk-row"></div><div class="sk sk-row"></div><div class="sk sk-row"></div>';
   try {
     _allInvoices = await API.getInvoices();
     updateInvSummary(_allInvoices);

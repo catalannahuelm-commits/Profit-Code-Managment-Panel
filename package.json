@@ -22,5 +22,9 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "csso-cli": "^4.0.2",
+    "terser": "^5.46.1"
   }
 }

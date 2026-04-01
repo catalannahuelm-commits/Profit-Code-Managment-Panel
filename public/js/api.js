@@ -6,11 +6,38 @@ function esc(str) {
   return div.innerHTML;
 }
 
-// Capa de comunicación con el backend
-// Todas las páginas usan estas funciones para hablar con el servidor
+// API response cache
+const _apiCache = {};
+const CACHE_TTL = 20000; // 20 seconds
+
+function getCached(key) {
+  const entry = _apiCache[key];
+  if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
+  return null;
+}
+
+function setCache(key, data) {
+  _apiCache[key] = { data, ts: Date.now() };
+}
+
+function clearCache(prefix) {
+  if (!prefix) { Object.keys(_apiCache).forEach(k => delete _apiCache[k]); return; }
+  Object.keys(_apiCache).forEach(k => { if (k.startsWith(prefix)) delete _apiCache[k]; });
+}
 
 const API = {
   async request(method, url, data) {
+    // Return cached GET responses
+    if (method === 'GET') {
+      const cached = getCached(url);
+      if (cached) return cached;
+    }
+    // Invalidate cache on mutations
+    if (method !== 'GET') {
+      const prefix = '/api/' + url.split('/')[2];
+      clearCache(prefix);
+    }
+
     const options = {
       method,
       headers: { 'Content-Type': 'application/json' }
@@ -23,6 +50,8 @@ const API = {
     if (!res.ok) {
       throw new Error(json.error || 'Error del servidor');
     }
+
+    if (method === 'GET') setCache(url, json);
     return json;
   },
 

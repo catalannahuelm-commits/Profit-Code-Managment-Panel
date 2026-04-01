@@ -13,6 +13,10 @@ function getStageConfig() {
 }
 
 window.Pages.clients = async function() {
+  var grid = document.getElementById('clients-grid');
+  if (grid && !grid.children.length) grid.innerHTML = '<div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div>';
+  var kpis = document.getElementById('clients-kpis');
+  if (kpis && !kpis.children.length) kpis.innerHTML = '<div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div>';
   try {
     _allClients = await API.getClients();
     renderClientsKPIs(_allClients);

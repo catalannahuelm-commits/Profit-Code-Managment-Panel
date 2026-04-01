@@ -17,6 +17,8 @@ function getPriorityConfig() {
 let _allTasks = [];
 
 window.Pages.tasks = async function() {
+  var list = document.getElementById('tasks-list');
+  if (list && !list.children.length) list.innerHTML = '<div class="sk sk-row"></div><div class="sk sk-row"></div><div class="sk sk-row"></div><div class="sk sk-row"></div>';
   try {
     _allTasks = await API.getTasks();
     updateSummary(_allTasks);

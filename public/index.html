@@ -7,10 +7,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="/css/variables.css">
-  <link rel="stylesheet" href="/css/layout.css">
-  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/dist/app.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" media="print" onload="this.media='all'">
+  <style>
+    /* Critical inline — skeleton loading */
+    .sk{background:linear-gradient(90deg,rgba(123,108,246,.06) 25%,rgba(123,108,246,.12) 50%,rgba(123,108,246,.06) 75%);background-size:200% 100%;animation:skPulse 1.5s ease-in-out infinite;border-radius:8px}
+    @keyframes skPulse{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .sk-card{height:120px;border-radius:var(--radius,12px);margin-bottom:16px}
+    .sk-kpi{height:90px;border-radius:var(--radius,12px)}
+    .sk-row{height:60px;border-radius:10px;margin-bottom:10px}
+    .sk-grid{display:grid;gap:16px;margin-bottom:24px}
+    .sk-grid-4{grid-template-columns:repeat(4,1fr)}
+    .sk-grid-3{grid-template-columns:repeat(3,1fr)}
+    .sk-grid-2{grid-template-columns:repeat(2,1fr)}
+    .sk-text{height:14px;width:60%;border-radius:4px;margin-bottom:8px}
+    .sk-title{height:22px;width:40%;border-radius:6px;margin-bottom:16px}
+  </style>
 </head>
 <body>
 
@@ -254,12 +266,9 @@
   <!-- Toast -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- Core (inline-critical, defer rest) -->
-  <script src="/js/api.js"></script>
-  <script src="/js/i18n.js"></script>
-  <script src="/js/socket.js"></script>
-  <!-- Chart.js + Flatpickr: lazy loaded -->
+  <!-- Single bundle: all JS minified -->
   <script>
+    window.Pages = {};
     var _libsLoaded = false;
     function loadLibs(cb) {
       if (_libsLoaded) { if (cb) cb(); return; }
@@ -270,159 +279,37 @@
       ];
       var loaded = 0;
       scripts.forEach(function(src) {
-        var s = document.createElement('script');
-        s.src = src;
+        var s = document.createElement('script'); s.src = src; s.async = true;
         s.onload = function() { if (++loaded === scripts.length) { _libsLoaded = true; if (cb) cb(); } };
         document.head.appendChild(s);
       });
     }
-    // Preload libs after login view renders
-    setTimeout(loadLibs, 1500);
-  </script>
-  <script>
-    window.Pages = {};
 
-    // Generate floating particles
+    // Particles (minimal)
     (function() {
-      const container = document.getElementById('particles');
-      if (!container) return;
-      for (let i = 0; i < 20; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.left = Math.random() * 100 + '%';
-        p.style.animationDuration = (4 + Math.random() * 12) + 's';
-        p.style.animationDelay = Math.random() * 6 + 's';
-        const size = 1.5 + Math.random() * 4;
-        p.style.width = p.style.height = size + 'px';
-        const colors = [
-          `rgba(123, 108, 246, ${0.3 + Math.random()*0.5})`,
-          `rgba(192, 132, 252, ${0.2 + Math.random()*0.4})`,
-          `rgba(255, 255, 255, ${0.1 + Math.random()*0.3})`,
-        ];
-        p.style.background = colors[Math.floor(Math.random() * colors.length)];
-        if (Math.random() > 0.7) p.style.boxShadow = `0 0 ${4 + Math.random()*8}px ${p.style.background}`;
-        container.appendChild(p);
+      var c = document.getElementById('particles'); if (!c) return;
+      for (var i = 0; i < 15; i++) {
+        var p = document.createElement('div'); p.className = 'particle';
+        p.style.cssText = 'left:'+Math.random()*100+'%;animation-duration:'+(4+Math.random()*12)+'s;animation-delay:'+Math.random()*6+'s;width:'+(1.5+Math.random()*4)+'px;height:'+(1.5+Math.random()*4)+'px;background:rgba(123,108,246,'+(0.3+Math.random()*0.5)+')';
+        c.appendChild(p);
       }
     })();
 
-    // Custom Select — replaces native <select> with styled dropdown
-    function upgradeSelects(container) {
-      (container || document).querySelectorAll('select.custom-select, .form-group select').forEach(sel => {
-        if (sel.dataset.upgraded) return;
-        sel.dataset.upgraded = '1';
-        sel.style.display = 'none';
+    // Custom Select
+    function upgradeSelects(r){(r||document).querySelectorAll('select.custom-select,.form-group select').forEach(function(s){if(s.dataset.upgraded)return;s.dataset.upgraded='1';s.style.display='none';var w=document.createElement('div');w.className='cs-wrapper';var t=document.createElement('div');t.className='cs-trigger';t.innerHTML='<span class="cs-value">'+esc(s.options[s.selectedIndex]?.text||'')+'</span><svg class="cs-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';var d=document.createElement('div');d.className='cs-dropdown';function b(){d.innerHTML='';Array.from(s.options).forEach(function(o,i){var it=document.createElement('div');it.className='cs-option'+(i===s.selectedIndex?' selected':'')+(o.value===''?' placeholder':'');it.textContent=o.text;it.dataset.value=o.value;it.addEventListener('click',function(e){e.stopPropagation();s.value=o.value;s.dispatchEvent(new Event('change'));t.querySelector('.cs-value').textContent=o.text;d.querySelectorAll('.cs-option').forEach(function(x){x.classList.remove('selected')});it.classList.add('selected');w.classList.remove('open')});d.appendChild(it)})}b();new MutationObserver(function(){b();t.querySelector('.cs-value').textContent=s.options[s.selectedIndex]?.text||''}).observe(s,{childList:true});t.addEventListener('click',function(e){e.stopPropagation();document.querySelectorAll('.cs-wrapper.open').forEach(function(x){if(x!==w)x.classList.remove('open')});w.classList.toggle('open')});w.appendChild(t);w.appendChild(d);s.parentNode.insertBefore(w,s.nextSibling)})}
+    document.addEventListener('click',function(){document.querySelectorAll('.cs-wrapper.open').forEach(function(w){w.classList.remove('open')})});
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'cs-wrapper';
+    // Flatpickr init
+    function initDatePickers(c){if(typeof flatpickr==='undefined')return;(c||document).querySelectorAll('input[type="date"]').forEach(function(i){if(i._flatpickr)return;i.type='text';i.placeholder='Seleccionar fecha...';flatpickr(i,{locale:'es',dateFormat:'Y-m-d',altInput:true,altFormat:'j \\de M Y',disableMobile:true,appendTo:i.closest('.modal')||undefined,static:true,position:'auto center',monthSelectorType:'static'})})}
 
-        const trigger = document.createElement('div');
-        trigger.className = 'cs-trigger';
-        trigger.innerHTML = `<span class="cs-value">${esc(sel.options[sel.selectedIndex]?.text || '')}</span><svg class="cs-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    function togglePassword(){var i=document.getElementById('login-password');i.type=i.type==='password'?'text':'password'}
+    document.addEventListener('click',function(e){if(e.target.classList.contains('modal-overlay')){e.target.classList.remove('active');var f=e.target.querySelector('form');if(f)f.reset()}});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.modal-overlay.active').forEach(function(m){m.classList.remove('active');var f=m.querySelector('form');if(f)f.reset()})});
 
-        const dropdown = document.createElement('div');
-        dropdown.className = 'cs-dropdown';
-
-        function buildOptions() {
-          dropdown.innerHTML = '';
-          Array.from(sel.options).forEach((opt, i) => {
-            const item = document.createElement('div');
-            item.className = 'cs-option' + (i === sel.selectedIndex ? ' selected' : '') + (opt.value === '' ? ' placeholder' : '');
-            item.textContent = opt.text;
-            item.dataset.value = opt.value;
-            item.addEventListener('click', (e) => {
-              e.stopPropagation();
-              sel.value = opt.value;
-              sel.dispatchEvent(new Event('change'));
-              trigger.querySelector('.cs-value').textContent = opt.text;
-              dropdown.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
-              item.classList.add('selected');
-              wrapper.classList.remove('open');
-            });
-            dropdown.appendChild(item);
-          });
-        }
-        buildOptions();
-
-        // Watch for option changes (dynamic selects)
-        const observer = new MutationObserver(() => {
-          buildOptions();
-          trigger.querySelector('.cs-value').textContent = sel.options[sel.selectedIndex]?.text || '';
-        });
-        observer.observe(sel, { childList: true });
-
-        trigger.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // Close other open selects
-          document.querySelectorAll('.cs-wrapper.open').forEach(w => { if (w !== wrapper) w.classList.remove('open'); });
-          wrapper.classList.toggle('open');
-        });
-
-        wrapper.appendChild(trigger);
-        wrapper.appendChild(dropdown);
-        sel.parentNode.insertBefore(wrapper, sel.nextSibling);
-      });
-    }
-
-    // Close custom selects on outside click
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.cs-wrapper.open').forEach(w => w.classList.remove('open'));
-    });
-
-    // Init Flatpickr on date inputs inside modals
-    function initDatePickers(container) {
-      if (typeof flatpickr === 'undefined') return;
-      const inputs = (container || document).querySelectorAll('input[type="date"]');
-      inputs.forEach(input => {
-        if (input._flatpickr) return;
-        input.type = 'text';
-        input.placeholder = 'Seleccionar fecha...';
-        flatpickr(input, {
-          locale: 'es',
-          dateFormat: 'Y-m-d',
-          altInput: true,
-          altFormat: 'j \\de M Y',
-          disableMobile: true,
-          appendTo: input.closest('.modal') || undefined,
-          static: true,
-          position: 'auto center',
-          monthSelectorType: 'static',
-        });
-      });
-    }
-
-    // Toggle password visibility
-    function togglePassword() {
-      const input = document.getElementById('login-password');
-      input.type = input.type === 'password' ? 'text' : 'password';
-    }
-    // Modales: cerrar al click afuera + Escape
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('modal-overlay')) {
-        e.target.classList.remove('active');
-        const form = e.target.querySelector('form');
-        if (form) form.reset();
-      }
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay.active').forEach(m => {
-          m.classList.remove('active');
-          const form = m.querySelector('form');
-          if (form) form.reset();
-        });
-      }
-    });
+    // Skeleton helper
+    function showSkeleton(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
   </script>
-  <script src="/js/pages/dashboard.js"></script>
-  <script src="/js/pages/pipeline.js"></script>
-  <script src="/js/pages/projects.js"></script>
-  <script src="/js/pages/tasks.js"></script>
-  <script src="/js/pages/invoices.js"></script>
-  <script src="/js/pages/expenses.js"></script>
-  <script src="/js/pages/clients.js"></script>
-  <script src="/js/pages/team.js"></script>
-  <script src="/js/pages/profile.js"></script>
-  <script src="/js/router.js"></script>
+  <script src="/dist/app.min.js"></script>
 
   <!-- Notification panel (outside app-layout to avoid stacking context issues) -->
   <div class="notification-panel" id="notification-panel">

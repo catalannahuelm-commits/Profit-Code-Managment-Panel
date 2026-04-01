@@ -9,6 +9,8 @@ const CAT_CONFIG = {
 let _allExpenses = [];
 
 window.Pages.expenses = async function() {
+  var list = document.getElementById('expenses-list');
+  if (list && !list.children.length) list.innerHTML = '<div class="sk sk-row"></div><div class="sk sk-row"></div><div class="sk sk-row"></div>';
   try {
     _allExpenses = await API.getExpenses();
     updateExpSummary(_allExpenses);
