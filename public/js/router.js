@@ -222,14 +222,14 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 
 // Toggle login/register
 function toggleAuthMode() {
-  const loginCard = document.querySelector('.login-card:not(.register-card)');
-  const registerCard = document.getElementById('register-card');
-  if (registerCard.style.display === 'none') {
-    loginCard.style.display = 'none';
-    registerCard.style.display = '';
+  const loginDiv = document.getElementById('auth-login');
+  const registerDiv = document.getElementById('auth-register');
+  if (registerDiv.style.display === 'none') {
+    loginDiv.style.display = 'none';
+    registerDiv.style.display = '';
   } else {
-    loginCard.style.display = '';
-    registerCard.style.display = 'none';
+    loginDiv.style.display = '';
+    registerDiv.style.display = 'none';
   }
 }
 
