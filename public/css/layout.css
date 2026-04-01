@@ -49,48 +49,48 @@
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
   opacity: 0.5;
-  animation: orbFloat 8s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  animation: orbFloat 10s ease-in-out infinite;
 }
 
 .orb-1 {
   width: 500px; height: 500px;
-  background: radial-gradient(circle, #7B6CF6, transparent 70%);
+  background: radial-gradient(circle, rgba(123,108,246,0.5) 0%, transparent 60%);
   top: -15%; left: -10%;
-  animation-duration: 10s;
+  animation-duration: 12s;
 }
 
 .orb-2 {
   width: 450px; height: 450px;
-  background: radial-gradient(circle, #9B59B6, transparent 70%);
+  background: radial-gradient(circle, rgba(155,89,182,0.45) 0%, transparent 60%);
   bottom: -20%; right: -10%;
-  animation-duration: 12s;
+  animation-duration: 14s;
   animation-delay: 2s;
 }
 
 .orb-3 {
   width: 300px; height: 300px;
-  background: radial-gradient(circle, #4A90D9, transparent 70%);
+  background: radial-gradient(circle, rgba(74,144,217,0.4) 0%, transparent 60%);
   top: 50%; left: 30%;
-  animation-duration: 9s;
+  animation-duration: 11s;
   animation-delay: 4s;
 }
 
 .orb-4 {
   width: 250px; height: 250px;
-  background: radial-gradient(circle, #6558E0, transparent 70%);
+  background: radial-gradient(circle, rgba(101,88,224,0.4) 0%, transparent 60%);
   top: 15%; right: 15%;
-  animation-duration: 11s;
+  animation-duration: 13s;
   animation-delay: 1s;
   opacity: 0.35;
 }
 
 @keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(40px, -50px) scale(1.08); }
-  50% { transform: translate(-30px, 30px) scale(0.92); }
-  75% { transform: translate(50px, 40px) scale(1.05); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  33% { transform: translate3d(35px, -40px, 0); }
+  66% { transform: translate3d(-25px, 30px, 0); }
 }
 
 /* Particles */
@@ -260,9 +260,7 @@
 
 /* Right: card */
 .login-card {
-  background: rgba(30, 15, 50, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(22, 10, 42, 0.95);
   border: 1px solid rgba(123, 108, 246, 0.15);
   border-radius: var(--radius-xl);
   padding: 48px 44px;
@@ -456,6 +454,7 @@
 }
 
 /* === APP BACKGROUND ORBS === */
+/* App orbs — NO filter:blur, gradient does the softness */
 .app-orbs {
   position: fixed;
   inset: 0;
@@ -469,111 +468,58 @@
 .app-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.45;
-  animation: appOrbFloat 10s ease-in-out infinite;
+  opacity: 0.4;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  animation: appOrbFloat 14s ease-in-out infinite;
 }
 
 .app-orb-1 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, #7B6CF6, transparent 70%);
-  top: -5%; left: 10%;
-  animation-duration: 14s;
-}
-.app-orb-2 {
-  width: 350px; height: 350px;
-  background: radial-gradient(circle, #9B59B6, transparent 70%);
-  bottom: -10%; right: 5%;
-  animation-duration: 16s;
-  animation-delay: 2s;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(123,108,246,0.35) 0%, transparent 65%);
+  top: -5%; left: 5%;
+  animation-duration: 18s;
 }
 .app-orb-3 {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, #4A90D9, transparent 70%);
-  top: 40%; left: 50%;
-  animation-duration: 12s;
-  animation-delay: 4s;
-  opacity: 0.35;
-}
-.app-orb-4 {
-  width: 250px; height: 250px;
-  background: radial-gradient(circle, #6558E0, transparent 70%);
-  top: 10%; right: 25%;
-  animation-duration: 18s;
-  animation-delay: 1s;
-  opacity: 0.4;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(74,144,217,0.25) 0%, transparent 65%);
+  top: 35%; left: 45%;
+  animation-duration: 15s;
+  animation-delay: 3s;
 }
 .app-orb-5 {
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, #7B6CF6, transparent 70%);
-  bottom: 20%; left: 25%;
-  animation-duration: 11s;
-  animation-delay: 3s;
-  opacity: 0.4;
-}
-.app-orb-6 {
   width: 350px; height: 350px;
-  background: radial-gradient(circle, #5a3d9e, transparent 70%);
-  top: 60%; right: 10%;
-  animation-duration: 15s;
+  background: radial-gradient(circle, rgba(123,108,246,0.3) 0%, transparent 65%);
+  bottom: 15%; left: 20%;
+  animation-duration: 16s;
   animation-delay: 5s;
-  opacity: 0.35;
 }
 .app-orb-7 {
-  width: 180px; height: 180px;
-  background: radial-gradient(circle, #A29BFE, transparent 70%);
-  top: 25%; left: 35%;
-  animation-duration: 13s;
-  animation-delay: 6s;
-  opacity: 0.4;
-}
-.app-orb-8 {
-  width: 280px; height: 280px;
-  background: radial-gradient(circle, #7B6CF6, transparent 70%);
-  bottom: 5%; left: 60%;
-  animation-duration: 17s;
-  animation-delay: 2.5s;
-  opacity: 0.35;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(162,155,254,0.25) 0%, transparent 65%);
+  top: 20%; left: 30%;
+  animation-duration: 20s;
+  animation-delay: 7s;
 }
 .app-orb-9 {
-  width: 220px; height: 220px;
-  background: radial-gradient(circle, #9B59B6, transparent 70%);
-  top: 75%; left: 5%;
-  animation-duration: 10s;
-  animation-delay: 7s;
-  opacity: 0.4;
-}
-.app-orb-10 {
-  width: 160px; height: 160px;
-  background: radial-gradient(circle, #6558E0, transparent 70%);
-  top: 5%; left: 70%;
-  animation-duration: 19s;
-  animation-delay: 1.5s;
-  opacity: 0.4;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(155,89,182,0.25) 0%, transparent 65%);
+  top: 65%; left: 5%;
+  animation-duration: 17s;
+  animation-delay: 2s;
 }
 .app-orb-11 {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, #4A3ABA, transparent 70%);
-  top: 50%; right: 40%;
-  animation-duration: 14s;
-  animation-delay: 8s;
-  opacity: 0.3;
-}
-.app-orb-12 {
-  width: 240px; height: 240px;
-  background: radial-gradient(circle, #7B6CF6, transparent 70%);
-  bottom: 30%; right: 30%;
-  animation-duration: 12s;
-  animation-delay: 3.5s;
-  opacity: 0.35;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(101,88,224,0.3) 0%, transparent 65%);
+  bottom: -5%; right: 10%;
+  animation-duration: 19s;
+  animation-delay: 4s;
 }
 
 @keyframes appOrbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  20% { transform: translate(30px, -40px) scale(1.06); }
-  40% { transform: translate(-25px, 35px) scale(0.94); }
-  60% { transform: translate(40px, 20px) scale(1.04); }
-  80% { transform: translate(-15px, -30px) scale(0.97); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  33% { transform: translate3d(30px, -35px, 0); }
+  66% { transform: translate3d(-25px, 25px, 0); }
 }
 
 /* Ensure content sits above orbs */
