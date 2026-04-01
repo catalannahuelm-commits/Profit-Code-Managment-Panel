@@ -1,0 +1,130 @@
+<div class="profile-page">
+  <!-- Header card -->
+  <div class="profile-header-card">
+    <div class="profile-avatar-section">
+      <div class="profile-avatar-wrapper" id="profile-avatar-wrapper">
+        <div class="profile-avatar" id="profile-avatar">N</div>
+        <div class="profile-avatar-overlay">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Cambiar</span>
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" hidden>
+      </div>
+      <div class="profile-header-info">
+        <div class="profile-name-row">
+          <h2 id="profile-display-name">Cargando...</h2>
+          <div class="profile-badge-icons" id="profile-badge-icons"></div>
+        </div>
+        <span class="profile-role-badge" id="profile-role">-</span>
+        <p class="profile-email-display" id="profile-email-display">-</p>
+      </div>
+    </div>
+    <div class="profile-header-meta">
+      <div class="profile-meta-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="profile-since">-</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Badges section -->
+  <div class="profile-section badges-section">
+    <div class="profile-section-header">
+      <h3>Insignias</h3>
+      <button class="btn btn-primary" onclick="Pages.profile.openGiveBadge()" style="padding:6px 14px;font-size:0.82rem;" id="btn-give-badge">+ Dar Insignia</button>
+    </div>
+    <div id="badges-unlocked" class="badges-grid"></div>
+    <div class="profile-section-header" style="margin-top:20px" id="badges-locked-header">
+      <h3 style="color:var(--text-muted);font-size:0.9rem">Por Desbloquear</h3>
+    </div>
+    <div id="badges-locked" class="badges-grid badges-locked"></div>
+  </div>
+
+  <!-- Give badge modal -->
+  <div class="modal-overlay" id="modal-give-badge">
+    <div class="modal">
+      <h2>Dar Insignia</h2>
+      <form id="form-give-badge">
+        <div class="form-group">
+          <label>Miembro</label>
+          <select id="badge-user" required></select>
+        </div>
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" id="badge-title" placeholder="Ej: MVP del Mes" required>
+        </div>
+        <div class="form-group">
+          <label>Icono</label>
+          <div class="badge-icon-picker" id="badge-icon-picker"></div>
+          <input type="hidden" id="badge-icon" value="⭐">
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="badge-color-picker" id="badge-color-picker"></div>
+          <input type="hidden" id="badge-color" value="#F5A623">
+        </div>
+        <div class="form-group">
+          <label>Motivo (opcional)</label>
+          <input type="text" id="badge-reason" placeholder="Ej: Excelente trabajo en el proyecto X">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-give-badge').classList.remove('active')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Dar Insignia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <!-- Left: Info form -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <h3>Información Personal</h3>
+      </div>
+      <form id="form-profile" class="profile-form">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="profile-name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="profile-email" required>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" id="profile-phone" placeholder="Opcional">
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea id="profile-bio" rows="3" placeholder="Contá algo sobre vos..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      </form>
+
+      <!-- Password -->
+      <div class="profile-section-header" style="margin-top:28px">
+        <h3>Cambiar Contraseña</h3>
+      </div>
+      <form id="form-password" class="profile-form">
+        <div class="form-group">
+          <label>Contraseña actual</label>
+          <input type="password" id="pw-current" required>
+        </div>
+        <div class="form-group">
+          <label>Nueva contraseña</label>
+          <input type="password" id="pw-new" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-ghost">Cambiar Contraseña</button>
+      </form>
+    </div>
+
+    <!-- Right: Notes -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <h3>Mis Notas</h3>
+        <button class="btn btn-primary" onclick="Pages.profile.addNote()" style="padding:6px 14px;font-size:0.82rem;">+ Nueva Nota</button>
+      </div>
+      <div id="notes-list" class="notes-list"></div>
+    </div>
+  </div>
+</div>

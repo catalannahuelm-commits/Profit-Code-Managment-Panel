@@ -1,0 +1,54 @@
+<!-- KPI resumen -->
+<div class="inv-summary" id="inv-summary"></div>
+
+<!-- Filtros + acciones -->
+<div class="tasks-toolbar">
+  <div class="tasks-filters">
+    <button class="btn btn-ghost invoice-filter active" data-filter="all">
+      Todas <span class="filter-count" id="inv-count-all">0</span>
+    </button>
+    <button class="btn btn-ghost invoice-filter" data-filter="pending">
+      <span class="filter-dot" style="background:#F5A623"></span> Pendientes <span class="filter-count" id="inv-count-pending">0</span>
+    </button>
+    <button class="btn btn-ghost invoice-filter" data-filter="paid">
+      <span class="filter-dot" style="background:#1DB954"></span> Pagadas <span class="filter-count" id="inv-count-paid">0</span>
+    </button>
+    <button class="btn btn-ghost invoice-filter" data-filter="overdue">
+      <span class="filter-dot" style="background:#E74C3C"></span> Vencidas <span class="filter-count" id="inv-count-overdue">0</span>
+    </button>
+  </div>
+  <button class="btn btn-primary" onclick="Pages.invoices.openNew()">+ Nueva Factura</button>
+</div>
+
+<div id="invoices-list" class="invoices-list"></div>
+
+<!-- Modal nueva factura -->
+<div class="modal-overlay" id="modal-invoice">
+  <div class="modal">
+    <h2>Nueva Factura</h2>
+    <form id="form-invoice">
+      <div class="form-group">
+        <label>Proyecto</label>
+        <select id="invoice-project" required>
+          <option value="">Seleccionar proyecto...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monto ($)</label>
+        <input type="number" id="invoice-amount" required>
+      </div>
+      <div class="form-group">
+        <label>Fecha de Vencimiento</label>
+        <input type="date" id="invoice-due" required>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="invoice-description" rows="2"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-invoice').classList.remove('active')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear Factura</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+<!-- KPI resumen -->
+<div class="tasks-summary" id="tasks-summary"></div>
+
+<!-- Filtros + acciones -->
+<div class="tasks-toolbar">
+  <div class="tasks-filters">
+    <button class="btn btn-ghost task-filter active" data-filter="all">
+      Todas <span class="filter-count" id="count-all">0</span>
+    </button>
+    <button class="btn btn-ghost task-filter" data-filter="pending">
+      <span class="filter-dot" style="background:#F5A623"></span> Pendientes <span class="filter-count" id="count-pending">0</span>
+    </button>
+    <button class="btn btn-ghost task-filter" data-filter="in_progress">
+      <span class="filter-dot" style="background:#7B6CF6"></span> En Proceso <span class="filter-count" id="count-in_progress">0</span>
+    </button>
+    <button class="btn btn-ghost task-filter" data-filter="done">
+      <span class="filter-dot" style="background:#1DB954"></span> Terminadas <span class="filter-count" id="count-done">0</span>
+    </button>
+  </div>
+  <button class="btn btn-primary" onclick="Pages.tasks.openNew()">+ Nueva Tarea</button>
+</div>
+
+<div id="tasks-list" class="tasks-list">
+  <!-- Se llena dinámicamente -->
+</div>
+
+<!-- Modal nueva tarea -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <h2 id="modal-task-title">Nueva Tarea</h2>
+    <form id="form-task">
+      <input type="hidden" id="task-id">
+      <div class="form-group">
+        <label>Título</label>
+        <input type="text" id="task-title" required>
+      </div>
+      <div class="form-group">
+        <label>Proyecto</label>
+        <select id="task-project" required>
+          <option value="">Seleccionar proyecto...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Asignar a</label>
+        <select id="task-assign">
+          <option value="">Sin asignar</option>
+        </select>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Prioridad</label>
+          <select id="task-priority">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deadline</label>
+          <input type="date" id="task-deadline">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="task-description" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-task').classList.remove('active')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

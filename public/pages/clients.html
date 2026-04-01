@@ -1,0 +1,48 @@
+<div class="clients-page">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+    <button class="btn btn-primary" id="btn-new-client" onclick="Pages.clients.openNew()">+ Nuevo Cliente</button>
+  </div>
+
+  <div class="clients-kpi-grid" id="clients-kpis"></div>
+
+  <div class="search-bar">
+    <span class="search-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input type="text" id="clients-search" placeholder="Buscar clientes..." oninput="Pages.clients.filter(this.value)">
+  </div>
+
+  <div class="clients-grid" id="clients-grid"></div>
+
+  <div class="modal-overlay" id="modal-new-client">
+    <div class="modal">
+      <h2>Nuevo Cliente</h2>
+      <form id="form-new-client">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="new-client-name" required placeholder="Nombre del contacto">
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <input type="text" id="new-client-company" placeholder="Nombre de la empresa">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="new-client-email" placeholder="email@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" id="new-client-phone" placeholder="+54 11 1234-5678">
+        </div>
+        <div class="form-group">
+          <label>Notas</label>
+          <textarea id="new-client-notes" rows="2" placeholder="Notas..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-new-client').classList.remove('active')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

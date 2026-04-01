@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profit Code - Agencia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-view" class="login-container">
+    <!-- Animated background orbs -->
+    <div class="login-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="orb orb-4"></div>
+    </div>
+
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="login-wrapper">
+      <!-- Left side: branding -->
+      <div class="login-brand">
+        <img src="/img/logo-profitcode.png" alt="Profit Code" class="login-logo">
+
+        <p class="login-tagline">Panel de Gestión para Agencias</p>
+
+        <div class="login-features">
+          <div class="login-feature">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </div>
+            <div>
+              <strong>Dashboard en tiempo real</strong>
+              <span>Métricas y KPIs al instante</span>
+            </div>
+          </div>
+          <div class="login-feature">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <strong>Pipeline de clientes</strong>
+              <span>Seguimiento de cada oportunidad</span>
+            </div>
+          </div>
+          <div class="login-feature">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <strong>Facturación integrada</strong>
+              <span>Controla ingresos y gastos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: form -->
+      <div class="login-card">
+        <div class="login-card-header">
+          <h2>Bienvenido</h2>
+          <p>Ingresa tus credenciales para continuar</p>
+        </div>
+
+        <div id="login-error" class="alert alert-error" style="display:none"></div>
+
+        <form id="login-form">
+          <div class="login-field">
+            <div class="field-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </div>
+            <input type="email" id="login-email" placeholder="tu@profitcode.com" required>
+          </div>
+          <div class="login-field">
+            <div class="field-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <input type="password" id="login-password" placeholder="Tu contraseña" required>
+            <button type="button" class="toggle-pass" onclick="togglePassword()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+
+          <div class="login-options">
+            <label class="remember-me">
+              <input type="checkbox" checked> <span class="remember-text">Recordarme</span>
+            </label>
+          </div>
+
+          <button type="submit" class="login-btn" id="login-btn">
+            <span class="login-btn-text">Ingresar</span>
+            <div class="login-btn-loader" style="display:none">
+              <div class="spinner"></div>
+            </div>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <div class="login-lang-switcher" id="login-lang-switcher"></div>
+          <p>Profit Code &copy; 2026 — Hecho con 💜</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app-view" class="app-layout" style="display:none">
+    <!-- Background Orbs -->
+    <div class="app-orbs">
+      <div class="app-orb app-orb-1"></div>
+      <div class="app-orb app-orb-2"></div>
+      <div class="app-orb app-orb-3"></div>
+      <div class="app-orb app-orb-4"></div>
+      <div class="app-orb app-orb-5"></div>
+      <div class="app-orb app-orb-6"></div>
+      <div class="app-orb app-orb-7"></div>
+      <div class="app-orb app-orb-8"></div>
+      <div class="app-orb app-orb-9"></div>
+      <div class="app-orb app-orb-10"></div>
+      <div class="app-orb app-orb-11"></div>
+      <div class="app-orb app-orb-12"></div>
+    </div>
+    <!-- Icon Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+      </div>
+      <div class="sidebar-nav" id="sidebar-nav"></div>
+      <div id="sidebar-lang"></div>
+      <div class="sidebar-help" title="Configuración">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div class="sidebar-user">
+        <button class="btn btn-ghost" id="btn-logout" title="Salir" aria-label="Cerrar sesión">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="content-wrapper">
+      <header class="header">
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <p class="header-subtitle" id="page-subtitle"></p>
+        </div>
+        <div class="header-actions">
+          <div class="header-search">
+            <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" placeholder="Buscar...">
+          </div>
+          <label class="switch" aria-label="Cambiar tema">
+            <input id="theme-input" type="checkbox" onchange="toggleTheme()">
+            <div class="slider round">
+              <div class="sun-moon">
+                <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="moon-dot-2" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="moon-dot-3" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="light-ray-1" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="light-ray-2" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="light-ray-3" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="cloud-1" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="cloud-2" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="cloud-3" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="cloud-4" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="cloud-5" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="cloud-6" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              </div>
+              <div class="stars">
+                <svg id="star-1" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                <svg id="star-2" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                <svg id="star-3" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                <svg id="star-4" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+              </div>
+            </div>
+          </label>
+          <div class="notification-wrapper">
+            <button class="notification-bell" id="notification-bell" onclick="toggleNotificationPanel()" aria-label="Notificaciones">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notification-badge" id="notification-count" style="display:none">0</span>
+            </button>
+          </div>
+          <div class="header-user" id="header-avatar"></div>
+        </div>
+      </header>
+
+      <main class="main-content" id="main-content"></main>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Chart.js + Flatpickr -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/socket.js"></script>
+  <script>
+    window.Pages = {};
+
+    // Generate floating particles
+    (function() {
+      const container = document.getElementById('particles');
+      if (!container) return;
+      for (let i = 0; i < 80; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (4 + Math.random() * 12) + 's';
+        p.style.animationDelay = Math.random() * 6 + 's';
+        const size = 1.5 + Math.random() * 4;
+        p.style.width = p.style.height = size + 'px';
+        const colors = [
+          `rgba(123, 108, 246, ${0.3 + Math.random()*0.5})`,
+          `rgba(192, 132, 252, ${0.2 + Math.random()*0.4})`,
+          `rgba(255, 255, 255, ${0.1 + Math.random()*0.3})`,
+        ];
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        if (Math.random() > 0.7) p.style.boxShadow = `0 0 ${4 + Math.random()*8}px ${p.style.background}`;
+        container.appendChild(p);
+      }
+    })();
+
+    // Custom Select — replaces native <select> with styled dropdown
+    function upgradeSelects(container) {
+      (container || document).querySelectorAll('select.custom-select, .form-group select').forEach(sel => {
+        if (sel.dataset.upgraded) return;
+        sel.dataset.upgraded = '1';
+        sel.style.display = 'none';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'cs-wrapper';
+
+        const trigger = document.createElement('div');
+        trigger.className = 'cs-trigger';
+        trigger.innerHTML = `<span class="cs-value">${esc(sel.options[sel.selectedIndex]?.text || '')}</span><svg class="cs-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'cs-dropdown';
+
+        function buildOptions() {
+          dropdown.innerHTML = '';
+          Array.from(sel.options).forEach((opt, i) => {
+            const item = document.createElement('div');
+            item.className = 'cs-option' + (i === sel.selectedIndex ? ' selected' : '') + (opt.value === '' ? ' placeholder' : '');
+            item.textContent = opt.text;
+            item.dataset.value = opt.value;
+            item.addEventListener('click', (e) => {
+              e.stopPropagation();
+              sel.value = opt.value;
+              sel.dispatchEvent(new Event('change'));
+              trigger.querySelector('.cs-value').textContent = opt.text;
+              dropdown.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+              item.classList.add('selected');
+              wrapper.classList.remove('open');
+            });
+            dropdown.appendChild(item);
+          });
+        }
+        buildOptions();
+
+        // Watch for option changes (dynamic selects)
+        const observer = new MutationObserver(() => {
+          buildOptions();
+          trigger.querySelector('.cs-value').textContent = sel.options[sel.selectedIndex]?.text || '';
+        });
+        observer.observe(sel, { childList: true });
+
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Close other open selects
+          document.querySelectorAll('.cs-wrapper.open').forEach(w => { if (w !== wrapper) w.classList.remove('open'); });
+          wrapper.classList.toggle('open');
+        });
+
+        wrapper.appendChild(trigger);
+        wrapper.appendChild(dropdown);
+        sel.parentNode.insertBefore(wrapper, sel.nextSibling);
+      });
+    }
+
+    // Close custom selects on outside click
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.cs-wrapper.open').forEach(w => w.classList.remove('open'));
+    });
+
+    // Init Flatpickr on date inputs inside modals
+    function initDatePickers(container) {
+      if (typeof flatpickr === 'undefined') return;
+      const inputs = (container || document).querySelectorAll('input[type="date"]');
+      inputs.forEach(input => {
+        if (input._flatpickr) return;
+        input.type = 'text';
+        input.placeholder = 'Seleccionar fecha...';
+        flatpickr(input, {
+          locale: 'es',
+          dateFormat: 'Y-m-d',
+          altInput: true,
+          altFormat: 'j \\de M Y',
+          disableMobile: true,
+          appendTo: input.closest('.modal') || undefined,
+          static: true,
+          position: 'auto center',
+          monthSelectorType: 'static',
+        });
+      });
+    }
+
+    // Toggle password visibility
+    function togglePassword() {
+      const input = document.getElementById('login-password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+    // Modales: cerrar al click afuera + Escape
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('active');
+        const form = e.target.querySelector('form');
+        if (form) form.reset();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => {
+          m.classList.remove('active');
+          const form = m.querySelector('form');
+          if (form) form.reset();
+        });
+      }
+    });
+  </script>
+  <script src="/js/pages/dashboard.js"></script>
+  <script src="/js/pages/pipeline.js"></script>
+  <script src="/js/pages/projects.js"></script>
+  <script src="/js/pages/tasks.js"></script>
+  <script src="/js/pages/invoices.js"></script>
+  <script src="/js/pages/expenses.js"></script>
+  <script src="/js/pages/clients.js"></script>
+  <script src="/js/pages/team.js"></script>
+  <script src="/js/pages/profile.js"></script>
+  <script src="/js/router.js"></script>
+
+  <!-- Notification panel (outside app-layout to avoid stacking context issues) -->
+  <div class="notification-panel" id="notification-panel">
+    <div class="notification-panel-header">
+      <strong>Notificaciones</strong>
+      <button class="btn btn-ghost" style="padding:4px 8px;font-size:0.7rem" onclick="markAllRead()">Marcar todas</button>
+    </div>
+    <div class="notification-panel-list" id="notification-list">
+      <div class="empty-state" style="padding:20px"><p>Sin notificaciones</p></div>
+    </div>
+  </div>
+</body>
+</html>

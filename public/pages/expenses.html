@@ -1,0 +1,70 @@
+<!-- KPI resumen -->
+<div class="exp-summary" id="exp-summary"></div>
+
+<!-- Filtros + acciones -->
+<div class="tasks-toolbar">
+  <div class="tasks-filters">
+    <button class="btn btn-ghost expense-filter active" data-filter="all">
+      Todos <span class="filter-count" id="exp-count-all">0</span>
+    </button>
+    <button class="btn btn-ghost expense-filter" data-filter="hosting">
+      <span class="filter-dot" style="background:#4A90D9"></span> Hosting <span class="filter-count" id="exp-count-hosting">0</span>
+    </button>
+    <button class="btn btn-ghost expense-filter" data-filter="tools">
+      <span class="filter-dot" style="background:#F5A623"></span> Herramientas <span class="filter-count" id="exp-count-tools">0</span>
+    </button>
+    <button class="btn btn-ghost expense-filter" data-filter="freelancer">
+      <span class="filter-dot" style="background:#E84393"></span> Freelancer <span class="filter-count" id="exp-count-freelancer">0</span>
+    </button>
+    <button class="btn btn-ghost expense-filter" data-filter="marketing">
+      <span class="filter-dot" style="background:#1DB954"></span> Marketing <span class="filter-count" id="exp-count-marketing">0</span>
+    </button>
+    <button class="btn btn-ghost expense-filter" data-filter="other">
+      <span class="filter-dot" style="background:#8888A8"></span> Otros <span class="filter-count" id="exp-count-other">0</span>
+    </button>
+  </div>
+  <button class="btn btn-primary" onclick="Pages.expenses.openNew()">+ Nuevo Gasto</button>
+</div>
+
+<div id="expenses-list" class="expenses-list"></div>
+
+<!-- Modal nuevo gasto -->
+<div class="modal-overlay" id="modal-expense">
+  <div class="modal">
+    <h2>Nuevo Gasto</h2>
+    <form id="form-expense">
+      <div class="form-group">
+        <label>Descripcion</label>
+        <input type="text" id="expense-description" placeholder="Ej: Hosting Vercel" required>
+      </div>
+      <div class="form-group">
+        <label>Monto ($)</label>
+        <input type="number" id="expense-amount" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="expense-category">
+          <option value="hosting">Hosting</option>
+          <option value="tools">Herramientas</option>
+          <option value="freelancer">Freelancer</option>
+          <option value="marketing">Marketing</option>
+          <option value="other">Otros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Proyecto (opcional)</label>
+        <select id="expense-project">
+          <option value="">Sin proyecto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="expense-date" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-expense').classList.remove('active')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Registrar Gasto</button>
+      </div>
+    </form>
+  </div>
+</div>
