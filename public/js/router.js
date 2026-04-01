@@ -2,6 +2,7 @@
 
 window.currentUser = null;
 window._currentPage = null;
+const _pageCache = {};
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -103,9 +104,20 @@ function showApp() {
 
   connectSocket();
   updateNotificationCount();
+  loadLibs();
 
   const defaultPage = window.currentUser.role === 'owner' ? 'dashboard' : 'tasks';
   navigateTo(defaultPage);
+
+  // Prefetch all pages in background
+  setTimeout(() => {
+    const pages = window.currentUser.role === 'owner'
+      ? ['pipeline','clients','projects','tasks','invoices','expenses','team','profile']
+      : ['profile'];
+    pages.forEach(p => {
+      if (!_pageCache[p]) fetch(`/pages/${p}.html`).then(r => r.ok ? r.text() : '').then(html => { if (html) _pageCache[p] = html; });
+    });
+  }, 2000);
 }
 
 async function navigateTo(page) {
@@ -140,12 +152,15 @@ async function navigateTo(page) {
   const notifPanel = document.getElementById('notification-panel');
   if (notifPanel) notifPanel.classList.remove('active');
 
-  // Load page
+  // Load page (cached)
   const content = document.getElementById('main-content');
   try {
-    const res = await fetch(`/pages/${page}.html`);
-    if (res.ok) {
-      content.innerHTML = await res.text();
+    if (!_pageCache[page]) {
+      const res = await fetch(`/pages/${page}.html`);
+      if (res.ok) _pageCache[page] = await res.text();
+    }
+    if (_pageCache[page]) {
+      content.innerHTML = _pageCache[page];
       content.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
       // Translate static elements in loaded page
       translateStaticElements();

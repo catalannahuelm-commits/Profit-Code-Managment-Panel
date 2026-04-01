@@ -5,7 +5,7 @@ let notifInterval = null;
 function connectSocket() {
   // Poll notifications every 30 seconds
   updateNotificationCount();
-  notifInterval = setInterval(updateNotificationCount, 30000);
+  notifInterval = setInterval(updateNotificationCount, 60000);
 }
 
 function disconnectSocket() {

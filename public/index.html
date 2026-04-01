@@ -6,7 +6,7 @@
   <title>Profit Code - Agencia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/layout.css">
@@ -30,7 +30,7 @@
     <div class="login-wrapper">
       <!-- Left side: branding -->
       <div class="login-brand">
-        <img src="/img/logo-profitcode.png" alt="Profit Code" class="login-logo">
+        <img src="/img/logo.webp" alt="Profit Code" class="login-logo" loading="eager" decoding="async">
 
         <p class="login-tagline">Panel de Gestión para Agencias</p>
 
@@ -174,20 +174,14 @@
 
   <!-- APP -->
   <div id="app-view" class="app-layout" style="display:none">
-    <!-- Background Orbs -->
+    <!-- Background Orbs (reduced for performance) -->
     <div class="app-orbs">
       <div class="app-orb app-orb-1"></div>
-      <div class="app-orb app-orb-2"></div>
       <div class="app-orb app-orb-3"></div>
-      <div class="app-orb app-orb-4"></div>
       <div class="app-orb app-orb-5"></div>
-      <div class="app-orb app-orb-6"></div>
       <div class="app-orb app-orb-7"></div>
-      <div class="app-orb app-orb-8"></div>
       <div class="app-orb app-orb-9"></div>
-      <div class="app-orb app-orb-10"></div>
       <div class="app-orb app-orb-11"></div>
-      <div class="app-orb app-orb-12"></div>
     </div>
     <!-- Icon Sidebar -->
     <nav class="sidebar">
@@ -262,13 +256,31 @@
   <!-- Toast -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- Chart.js + Flatpickr -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+  <!-- Core (inline-critical, defer rest) -->
   <script src="/js/api.js"></script>
   <script src="/js/i18n.js"></script>
   <script src="/js/socket.js"></script>
+  <!-- Chart.js + Flatpickr: lazy loaded -->
+  <script>
+    var _libsLoaded = false;
+    function loadLibs(cb) {
+      if (_libsLoaded) { if (cb) cb(); return; }
+      var scripts = [
+        'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js',
+        'https://cdn.jsdelivr.net/npm/flatpickr',
+        'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js'
+      ];
+      var loaded = 0;
+      scripts.forEach(function(src) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = function() { if (++loaded === scripts.length) { _libsLoaded = true; if (cb) cb(); } };
+        document.head.appendChild(s);
+      });
+    }
+    // Preload libs after login view renders
+    setTimeout(loadLibs, 1500);
+  </script>
   <script>
     window.Pages = {};
 
@@ -276,7 +288,7 @@
     (function() {
       const container = document.getElementById('particles');
       if (!container) return;
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 20; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
         p.style.left = Math.random() * 100 + '%';

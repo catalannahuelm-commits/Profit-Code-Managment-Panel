@@ -127,6 +127,29 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* GPU acceleration hints */
+.app-orb, .orb, .particle {
+  will-change: transform;
+  contain: strict;
+}
+
+.main-content {
+  contain: layout style;
+}
+
+.kpi-card, .dashboard-kpi, .client-card, .project-card,
+.pipeline-card, .task-card, .inv-card, .exp-card, .team-card {
+  contain: layout style paint;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   font-family: var(--font);
   background: var(--bg-body);
