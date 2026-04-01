@@ -45,6 +45,17 @@ const I18N = {
     login_pass_ph: 'Tu contraseña',
     login_remember: 'Recordarme',
     login_submit: 'Ingresar',
+    register_title: 'Crear Organización',
+    register_subtitle: 'Registra tu agencia y empezá a gestionar',
+    register_org_ph: 'Nombre de tu agencia',
+    register_name_ph: 'Tu nombre',
+    register_email_ph: 'tu@agencia.com',
+    register_pass_ph: 'Contraseña (mín. 6 caracteres)',
+    register_submit: 'Crear cuenta',
+    register_no_account: '¿No tenés cuenta?',
+    register_create: 'Crear organización',
+    register_has_account: '¿Ya tenés cuenta?',
+    register_login: 'Iniciar sesión',
 
     // Header
     header_search_ph: 'Buscar...',
@@ -330,6 +341,17 @@ const I18N = {
     login_pass_ph: 'Your password',
     login_remember: 'Remember me',
     login_submit: 'Sign In',
+    register_title: 'Create Organization',
+    register_subtitle: 'Register your agency and start managing',
+    register_org_ph: 'Your agency name',
+    register_name_ph: 'Your name',
+    register_email_ph: 'you@agency.com',
+    register_pass_ph: 'Password (min. 6 characters)',
+    register_submit: 'Create account',
+    register_no_account: 'Don\'t have an account?',
+    register_create: 'Create organization',
+    register_has_account: 'Already have an account?',
+    register_login: 'Sign in',
 
     header_search_ph: 'Search...',
     header_settings: 'Settings',
@@ -599,6 +621,17 @@ const I18N = {
     login_pass_ph: 'Sua senha',
     login_remember: 'Lembrar-me',
     login_submit: 'Entrar',
+    register_title: 'Criar Organização',
+    register_subtitle: 'Registre sua agência e comece a gerenciar',
+    register_org_ph: 'Nome da sua agência',
+    register_name_ph: 'Seu nome',
+    register_email_ph: 'voce@agencia.com',
+    register_pass_ph: 'Senha (mín. 6 caracteres)',
+    register_submit: 'Criar conta',
+    register_no_account: 'Não tem conta?',
+    register_create: 'Criar organização',
+    register_has_account: 'Já tem conta?',
+    register_login: 'Entrar',
 
     header_search_ph: 'Buscar...',
     header_settings: 'Configurações',
@@ -948,6 +981,28 @@ function updateLoginTexts() {
     if (titleEl && keys[i]) titleEl.textContent = t(`${keys[i]}_title`);
     if (descEl && keys[i]) descEl.textContent = t(`${keys[i]}_desc`);
   });
+
+  // Register form
+  const regTitle = document.getElementById('register-title');
+  if (regTitle) regTitle.textContent = t('register_title');
+  const regSub = document.getElementById('register-subtitle');
+  if (regSub) regSub.textContent = t('register_subtitle');
+  const regOrg = document.getElementById('reg-org-name');
+  if (regOrg) regOrg.placeholder = t('register_org_ph');
+  const regName = document.getElementById('reg-name');
+  if (regName) regName.placeholder = t('register_name_ph');
+  const regEmail = document.getElementById('reg-email');
+  if (regEmail) regEmail.placeholder = t('register_email_ph');
+  const regPass = document.getElementById('reg-password');
+  if (regPass) regPass.placeholder = t('register_pass_ph');
+  const regBtnText = document.getElementById('register-btn-text');
+  if (regBtnText) regBtnText.textContent = t('register_submit');
+  const toggleText = document.getElementById('toggle-mode-text');
+  if (toggleText) toggleText.textContent = t('register_no_account');
+  const toggleBtn = document.getElementById('toggle-mode-btn');
+  if (toggleBtn) toggleBtn.textContent = t('register_create');
+  const toggleText2 = document.getElementById('toggle-mode-text-2');
+  if (toggleText2) toggleText2.textContent = t('register_has_account');
 
   renderLoginLangSwitcher();
 }

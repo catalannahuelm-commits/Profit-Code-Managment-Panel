@@ -3423,3 +3423,31 @@ tr:hover {
   height: 100%;
   display: block;
 }
+
+/* Login/Register toggle */
+.login-toggle-mode {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: inherit;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.btn-link:hover {
+  color: var(--primary-light);
+}
+
+.register-card {
+  animation: pageIn 0.35s ease-out;
+}

@@ -30,6 +30,9 @@ const API = {
   login(email, password) {
     return this.request('POST', '/api/auth/login', { email, password });
   },
+  register(data) {
+    return this.request('POST', '/api/auth/register', data);
+  },
   logout() {
     return this.request('POST', '/api/auth/logout');
   },

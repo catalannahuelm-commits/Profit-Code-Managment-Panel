@@ -205,5 +205,49 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   showLogin();
 });
 
+// Toggle login/register
+function toggleAuthMode() {
+  const loginCard = document.querySelector('.login-card:not(.register-card)');
+  const registerCard = document.getElementById('register-card');
+  if (registerCard.style.display === 'none') {
+    loginCard.style.display = 'none';
+    registerCard.style.display = '';
+  } else {
+    loginCard.style.display = '';
+    registerCard.style.display = 'none';
+  }
+}
+
+// Register form
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('register-error');
+  const btn = document.getElementById('register-btn');
+  const btnText = document.getElementById('register-btn-text');
+  const btnLoader = btn.querySelector('.login-btn-loader');
+
+  try {
+    btn.disabled = true;
+    if (btnText) btnText.style.display = 'none';
+    if (btnLoader) btnLoader.style.display = 'block';
+
+    window.currentUser = await API.register({
+      org_name: document.getElementById('reg-org-name').value,
+      name: document.getElementById('reg-name').value,
+      email: document.getElementById('reg-email').value,
+      password: document.getElementById('reg-password').value,
+    });
+    errorEl.style.display = 'none';
+    showApp();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    if (btnText) btnText.style.display = 'inline';
+    if (btnLoader) btnLoader.style.display = 'none';
+  }
+});
+
 // Start
 init();
