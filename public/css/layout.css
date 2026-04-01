@@ -528,7 +528,7 @@
   z-index: 1;
 }
 
-/* === SIDEBAR (icon-only) === */
+/* === SIDEBAR (icon-only, expands on hover) === */
 .sidebar {
   grid-row: 1 / -1;
   background: var(--bg-sidebar);
@@ -540,8 +540,9 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  overflow: visible;
   transition: background var(--transition);
+  z-index: 50;
 }
 
 .sidebar-logo {
@@ -575,9 +576,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
-  padding: 0 12px;
+  padding: 0 10px;
 }
 
 .sidebar-nav a {
@@ -586,34 +587,24 @@
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0;
   color: var(--text-muted);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 1.2rem;
   text-decoration: none;
   position: relative;
-}
-
-.sidebar-nav a .nav-label {
-  display: none;
-}
-
-.sidebar-nav a:hover {
-  background: rgba(123, 108, 246, 0.15);
-  color: var(--primary-light);
-  transform: scale(1.08);
-}
-
-.sidebar-nav a.active {
-  background: linear-gradient(135deg, #7B6CF6, #6558E0);
-  color: white;
-  box-shadow: 0 4px 18px rgba(123, 108, 246, 0.5), 0 0 30px rgba(123, 108, 246, 0.15);
+  overflow: hidden;
+  white-space: nowrap;
+  justify-content: center;
 }
 
 .sidebar-nav a .nav-icon {
   font-size: 1.15rem;
   line-height: 1;
   display: flex;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
 }
 
 .sidebar-nav a .nav-icon svg {
@@ -621,27 +612,49 @@
   height: 22px;
 }
 
-/* Tooltip on hover */
-.sidebar-nav a::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: calc(100% + 10px);
-  background: var(--bg-elevated);
-  color: var(--text);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  white-space: nowrap;
+.sidebar-nav a .nav-label {
+  font-size: 0.78rem;
+  font-weight: 600;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  z-index: 100;
+  max-width: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.01em;
 }
 
-.sidebar-nav a:hover::after {
+/* HOVER: expand with label */
+.sidebar-nav a:hover {
+  width: auto;
+  min-width: 44px;
+  padding: 0 16px 0 12px;
+  gap: 10px;
+  background: rgba(123, 108, 246, 0.12);
+  color: var(--primary-light);
+  justify-content: flex-start;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(123, 108, 246, 0.15);
+}
+
+.sidebar-nav a:hover .nav-label {
   opacity: 1;
+  max-width: 140px;
+}
+
+/* ACTIVE state */
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, #7B6CF6, #6558E0);
+  color: white;
+  box-shadow: 0 4px 18px rgba(123, 108, 246, 0.5), 0 0 30px rgba(123, 108, 246, 0.15);
+}
+
+.sidebar-nav a.active:hover {
+  background: linear-gradient(135deg, #8B7EF7, #7568F0);
+  box-shadow: 0 6px 24px rgba(123, 108, 246, 0.6), 0 0 40px rgba(123, 108, 246, 0.2);
+}
+
+/* Remove old tooltip — label IS the tooltip now */
+.sidebar-nav a::after {
+  display: none;
 }
 
 .sidebar-help {

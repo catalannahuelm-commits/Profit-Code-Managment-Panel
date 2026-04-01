@@ -1795,10 +1795,12 @@ tr:hover {
   font-weight: 700;
   color: var(--text-heading);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .exp-card-amount.large {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: #d05a4f;
 }
 
