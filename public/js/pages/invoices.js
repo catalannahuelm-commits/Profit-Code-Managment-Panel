@@ -177,7 +177,7 @@ function invoiceStatusLabel(status) {
 }
 
 async function markAsPaid(id) {
-  if (!confirm(t('invoices_confirm_pay'))) return;
+  if (!(await confirmDialog(t('invoices_confirm_pay')))) return;
   try {
     await API.updateInvoice(id, { status: 'paid' });
     window.Pages.invoices();
@@ -187,7 +187,7 @@ async function markAsPaid(id) {
 }
 
 window.Pages.invoices.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteInvoice(id);
   clearCache('/api/invoices');
   window.Pages.invoices();

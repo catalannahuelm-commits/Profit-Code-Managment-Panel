@@ -215,7 +215,7 @@ async function updateTaskStatus(taskId, status) {
 }
 
 window.Pages.tasks.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteTask(id);
   clearCache('/api/tasks');
   window.Pages.tasks();

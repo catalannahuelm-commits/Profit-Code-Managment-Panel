@@ -140,7 +140,7 @@ function renderNotes(notes) {
   // Delete
   container.querySelectorAll('.note-delete-btn').forEach(btn => {
     btn.onclick = async () => {
-      if (!confirm(t('profile_confirm_delete_note'))) return;
+      if (!(await confirmDialog(t('profile_confirm_delete_note')))) return;
       await API.deleteNote(btn.dataset.id);
       const notes = await API.getNotes();
       renderNotes(notes);

@@ -123,7 +123,7 @@ function renderClientCards(clients) {
 }
 
 window.Pages.clients.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteClient(id);
   clearCache('/api/clients');
   window.Pages.clients();

@@ -147,7 +147,7 @@ function renderProjectCards(projects) {
 }
 
 window.Pages.projects.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteProject(id);
   clearCache('/api/projects');
   window.Pages.projects();

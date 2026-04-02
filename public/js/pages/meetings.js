@@ -210,7 +210,7 @@ window.Pages.meetings.nextMonth = function() {
 };
 
 window.Pages.meetings.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteMeeting(id);
   clearCache('/api/meetings');
   _allMeetings = await API.getMeetings();

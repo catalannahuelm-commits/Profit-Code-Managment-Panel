@@ -269,6 +269,35 @@
   <!-- Single bundle: all JS minified -->
   <script>
     window.Pages = {};
+
+    // Custom confirm dialog — replaces native confirm()
+    function confirmDialog(message, title) {
+      return new Promise(function(resolve) {
+        var overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML =
+          '<div class="confirm-box">' +
+            '<div class="confirm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>' +
+            '<div class="confirm-title">' + (title || '¿Estás seguro?') + '</div>' +
+            '<div class="confirm-text">' + message + '</div>' +
+            '<div class="confirm-actions">' +
+              '<button class="btn-confirm-cancel">Cancelar</button>' +
+              '<button class="btn-confirm-delete">Eliminar</button>' +
+            '</div>' +
+          '</div>';
+
+        overlay.querySelector('.btn-confirm-cancel').onclick = function() { overlay.remove(); resolve(false); };
+        overlay.querySelector('.btn-confirm-delete').onclick = function() { overlay.remove(); resolve(true); };
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+        document.addEventListener('keydown', function handler(e) {
+          if (e.key === 'Escape') { overlay.remove(); resolve(false); document.removeEventListener('keydown', handler); }
+        });
+
+        document.body.appendChild(overlay);
+        overlay.querySelector('.btn-confirm-delete').focus();
+      });
+    }
+
     var _libsLoaded = false;
     function loadLibs(cb) {
       if (_libsLoaded) { if (cb) cb(); return; }

@@ -107,7 +107,7 @@ function renderTimeHistory() {
 }
 
 window.Pages.timetrack.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteTimeEntry(id);
   clearCache('/api/time');
   window.Pages.timetrack();

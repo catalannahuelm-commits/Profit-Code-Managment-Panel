@@ -150,7 +150,7 @@ function expenseCategoryLabel(cat) {
 }
 
 window.Pages.expenses.delete = async function(id) {
-  if (!confirm(t('confirm_delete'))) return;
+  if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteExpense(id);
   clearCache('/api/invoices');
   window.Pages.expenses();
