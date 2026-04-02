@@ -55,16 +55,22 @@ function setupHandlers() {
   // Avatar upload
   const wrapper = document.getElementById('profile-avatar-wrapper');
   const fileInput = document.getElementById('avatar-input');
+  let uploading = false;
 
-  wrapper.onclick = () => fileInput.click();
+  wrapper.onclick = (e) => {
+    e.stopPropagation();
+    if (uploading) return;
+    fileInput.value = '';
+    fileInput.click();
+  };
   fileInput.onchange = async () => {
-    if (!fileInput.files[0]) return;
+    if (!fileInput.files[0] || uploading) return;
+    uploading = true;
     try {
       const result = await API.uploadAvatar(fileInput.files[0]);
       const avatar = document.getElementById('profile-avatar');
       avatar.innerHTML = `<img src="${result.avatar}" alt="Avatar">`;
       avatar.classList.add('has-img');
-      // Update header avatar
       const headerAvatar = document.getElementById('header-avatar');
       if (headerAvatar) {
         headerAvatar.innerHTML = `<img src="${result.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
@@ -72,6 +78,9 @@ function setupHandlers() {
       showToast(t('profile_avatar_updated'));
     } catch (err) {
       showToast(err.message);
+    } finally {
+      uploading = false;
+      fileInput.value = '';
     }
   };
 
