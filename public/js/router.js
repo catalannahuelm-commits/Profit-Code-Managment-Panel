@@ -3,7 +3,7 @@
 window.currentUser = null;
 window._currentPage = null;
 const _pageCache = {};
-const _appVersion = '20';
+const _appVersion = '21';
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -196,14 +196,33 @@ async function navigateTo(page) {
 function showOnboarding() {
   if (localStorage.getItem('onboarding-done')) return;
 
-  const steps = [
-    { icon: '👋', title: t('onboarding_welcome') || '¡Bienvenido a Profit Code!', desc: t('onboarding_welcome_desc') || 'Tu panel de gestión está listo. Te mostramos cómo funciona en 30 segundos.' },
-    { icon: '👥', title: t('onboarding_clients') || 'Clientes y Pipeline', desc: t('onboarding_clients_desc') || 'Cargá tus clientes y arrastralos por las etapas del pipeline: Lead → Propuesta → Desarrollo → Entregado → Cobrado.' },
-    { icon: '📁', title: t('onboarding_projects') || 'Proyectos y Tareas', desc: t('onboarding_projects_desc') || 'Creá proyectos, asigná tareas a tu equipo, y controlá el progreso con deadlines y prioridades.' },
-    { icon: '💰', title: t('onboarding_billing') || 'Facturación y Gastos', desc: t('onboarding_billing_desc') || 'Registrá facturas por proyecto, controlá tus gastos, y tené siempre claro tu ganancia neta.' },
-    { icon: '🤖', title: t('onboarding_ai') || 'IA y más', desc: t('onboarding_ai_desc') || 'Usá la IA para generar propuestas, chatear con tu equipo, trackear tiempo, y compartir progreso con clientes.' },
-    { icon: '🚀', title: t('onboarding_ready') || '¡Listo para arrancar!', desc: t('onboarding_ready_desc') || 'Empezá creando tu primer cliente desde el Pipeline. Cualquier duda, explorá cada sección del sidebar.' },
-  ];
+  const ob = {
+    es: [
+      { icon: '👋', title: '¡Bienvenido a Profit Code!', desc: 'Tu panel de gestión está listo. Te mostramos cómo funciona en 30 segundos.' },
+      { icon: '👥', title: 'Clientes y Pipeline', desc: 'Cargá tus clientes y arrastralos por las etapas del pipeline: Lead → Propuesta → Desarrollo → Entregado → Cobrado.' },
+      { icon: '📁', title: 'Proyectos y Tareas', desc: 'Creá proyectos, asigná tareas a tu equipo, y controlá el progreso con deadlines y prioridades.' },
+      { icon: '💰', title: 'Facturación y Gastos', desc: 'Registrá facturas por proyecto, controlá tus gastos, y tené siempre claro tu ganancia neta.' },
+      { icon: '🤖', title: 'IA y más', desc: 'Usá la IA para generar propuestas, chatear con tu equipo, trackear tiempo, y compartir progreso con clientes.' },
+      { icon: '🚀', title: '¡Listo para arrancar!', desc: 'Empezá creando tu primer cliente desde el Pipeline. Cualquier duda, explorá cada sección del sidebar.' },
+    ],
+    en: [
+      { icon: '👋', title: 'Welcome to Profit Code!', desc: 'Your management panel is ready. We\'ll show you how it works in 30 seconds.' },
+      { icon: '👥', title: 'Clients & Pipeline', desc: 'Add your clients and drag them through pipeline stages: Lead → Proposal → Development → Delivered → Paid.' },
+      { icon: '📁', title: 'Projects & Tasks', desc: 'Create projects, assign tasks to your team, and track progress with deadlines and priorities.' },
+      { icon: '💰', title: 'Billing & Expenses', desc: 'Create invoices per project, track expenses, and always know your net profit.' },
+      { icon: '🤖', title: 'AI & more', desc: 'Use AI to generate proposals, chat with your team, track time, and share progress with clients.' },
+      { icon: '🚀', title: 'Ready to go!', desc: 'Start by creating your first client from the Pipeline. Explore each sidebar section.' },
+    ],
+    pt: [
+      { icon: '👋', title: 'Bem-vindo ao Profit Code!', desc: 'Seu painel de gestão está pronto. Vamos te mostrar como funciona em 30 segundos.' },
+      { icon: '👥', title: 'Clientes e Pipeline', desc: 'Adicione clientes e arraste-os pelas etapas do pipeline: Lead → Proposta → Desenvolvimento → Entregue → Pago.' },
+      { icon: '📁', title: 'Projetos e Tarefas', desc: 'Crie projetos, atribua tarefas à equipe e acompanhe o progresso com prazos e prioridades.' },
+      { icon: '💰', title: 'Faturamento e Despesas', desc: 'Registre faturas por projeto, controle despesas e tenha sempre claro seu lucro líquido.' },
+      { icon: '🤖', title: 'IA e mais', desc: 'Use IA para gerar propostas, conversar com a equipe, registrar tempo e compartilhar progresso com clientes.' },
+      { icon: '🚀', title: 'Pronto para começar!', desc: 'Comece criando seu primeiro cliente no Pipeline. Explore cada seção do menu lateral.' },
+    ]
+  };
+  const steps = ob[getLang()] || ob.es;
 
   let current = 0;
 
@@ -223,8 +242,8 @@ function showOnboarding() {
         <div class="onboarding-title">${s.title}</div>
         <div class="onboarding-desc">${s.desc}</div>
         <div class="onboarding-actions">
-          <button class="onboarding-btn-skip" id="ob-skip">${current === steps.length - 1 ? '' : (t('onboarding_skip') || 'Saltar')}</button>
-          <button class="onboarding-btn-next" id="ob-next">${current === steps.length - 1 ? (t('onboarding_start') || '¡Empezar!') : (t('onboarding_next') || 'Siguiente →')}</button>
+          ${current < steps.length - 1 ? '<button class="onboarding-btn-skip" id="ob-skip">' + ({es:'Saltar',en:'Skip',pt:'Pular'}[getLang()] || 'Saltar') + '</button>' : ''}
+          <button class="onboarding-btn-next" id="ob-next">${current === steps.length - 1 ? ({es:'¡Empezar!',en:'Let\'s go!',pt:'Vamos!'}[getLang()] || '¡Empezar!') : ({es:'Siguiente →',en:'Next →',pt:'Próximo →'}[getLang()] || 'Siguiente →')}</button>
         </div>
       </div>
     `;
