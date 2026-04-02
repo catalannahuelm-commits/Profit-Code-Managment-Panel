@@ -130,6 +130,35 @@ const API = {
   giveBadge(data) { return this.request('POST', '/api/badges/give', data); },
   deleteManualBadge(id) { return this.request('DELETE', `/api/badges/manual/${id}`); },
 
+  // Chat
+  getChat() { return this.request('GET', '/api/chat'); },
+  sendChat(message) { return this.request('POST', '/api/chat', { message }); },
+
+  // Time tracking
+  getTimeEntries() { return this.request('GET', '/api/time'); },
+  createTimeEntry(data) { return this.request('POST', '/api/time', data); },
+  deleteTimeEntry(id) { return this.request('DELETE', `/api/time/${id}`); },
+
+  // Templates
+  getTemplates() { return this.request('GET', '/api/templates'); },
+  createTemplate(data) { return this.request('POST', '/api/templates', data); },
+  applyTemplate(data) { return this.request('POST', '/api/templates/apply', data); },
+  deleteTemplate(id) { return this.request('DELETE', `/api/templates/${id}`); },
+
+  // Client portal
+  getPortalTokens() { return this.request('GET', '/api/portal'); },
+  createPortalToken(project_id) { return this.request('POST', '/api/portal', { project_id }); },
+  viewPortal(token) { return this.request('GET', `/api/portal/view/${token}`); },
+  deletePortalToken(id) { return this.request('DELETE', `/api/portal/${id}`); },
+
+  // Webhooks
+  getWebhooks() { return this.request('GET', '/api/webhooks'); },
+  createWebhook(data) { return this.request('POST', '/api/webhooks', data); },
+  deleteWebhook(id) { return this.request('DELETE', `/api/webhooks/${id}`); },
+
+  // AI
+  aiGenerate(type, context) { return this.request('POST', '/api/ai/generate', { type, context }); },
+
   // Meetings
   getMeetings() { return this.request('GET', '/api/meetings'); },
   createMeeting(data) { return this.request('POST', '/api/meetings', data); },

@@ -445,9 +445,202 @@ module.exports = async (req, res) => {
       }
     }
 
+    // ========== CHAT ==========
+    if (parts[0] === 'chat') {
+      const u = auth(req, res); if (!u) return;
+      if (method === 'GET') {
+        const limit = 100;
+        const { data } = await supabase.from('chat_messages').select('*, users(name)').eq('org_id', u.org_id).order('created_at', { ascending: false }).limit(limit);
+        return res.json((data || []).reverse().map(m => ({ ...m, user_name: m.users?.name, users: undefined })));
+      }
+      if (method === 'POST') {
+        const { message } = req.body;
+        if (!message?.trim()) return res.status(400).json({ error: 'Mensaje vacío' });
+        const { data } = await supabase.from('chat_messages').insert({ org_id: u.org_id, user_id: u.id, message: message.trim() }).select('*, users(name)').single();
+        data.user_name = data.users?.name; delete data.users;
+        // Trigger webhooks for chat
+        fireWebhooks(u.org_id, 'chat.message', { user: u.name, message: message.trim() });
+        return res.status(201).json(data);
+      }
+    }
+
+    // ========== TIME TRACKING ==========
+    if (parts[0] === 'time') {
+      const u = auth(req, res); if (!u) return;
+      if (!parts[1]) {
+        if (method === 'GET') {
+          const { data } = await supabase.from('time_entries').select('*, users(name), tasks(title), projects(name)').eq('org_id', u.org_id).order('date', { ascending: false }).limit(200);
+          return res.json((data || []).map(t => ({ ...t, user_name: t.users?.name, task_title: t.tasks?.title, project_name: t.projects?.name, users: undefined, tasks: undefined, projects: undefined })));
+        }
+        if (method === 'POST') {
+          const { task_id, project_id, description, minutes, date } = req.body;
+          if (!minutes) return res.status(400).json({ error: 'Minutos requeridos' });
+          const { data } = await supabase.from('time_entries').insert({ org_id: u.org_id, user_id: u.id, task_id: task_id || null, project_id: project_id || null, description, minutes, date: date || new Date().toISOString().split('T')[0] }).select().single();
+          return res.status(201).json(data);
+        }
+      }
+      if (parts[1] && method === 'DELETE') {
+        await supabase.from('time_entries').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+        return res.json({ ok: true });
+      }
+    }
+
+    // ========== TEMPLATES ==========
+    if (parts[0] === 'templates') {
+      const u = ownerOnly(req, res); if (!u) return;
+      if (!parts[1]) {
+        if (method === 'GET') {
+          const { data } = await supabase.from('project_templates').select('*').eq('org_id', u.org_id).order('created_at', { ascending: false });
+          return res.json(data || []);
+        }
+        if (method === 'POST') {
+          const { name, description, tasks } = req.body;
+          if (!name) return res.status(400).json({ error: 'Nombre requerido' });
+          const { data } = await supabase.from('project_templates').insert({ org_id: u.org_id, name, description, tasks: tasks || [] }).select().single();
+          return res.status(201).json(data);
+        }
+      }
+      // Apply template — creates project + tasks from template
+      if (parts[1] === 'apply' && method === 'POST') {
+        const { template_id, client_id, project_name, budget, deadline } = req.body;
+        const { data: tpl } = await supabase.from('project_templates').select('*').eq('id', template_id).eq('org_id', u.org_id).single();
+        if (!tpl) return res.status(404).json({ error: 'Template no encontrado' });
+        // Create project
+        const { data: proj } = await supabase.from('projects').insert({ org_id: u.org_id, client_id, name: project_name || tpl.name, description: tpl.description, budget: budget || 0, deadline }).select().single();
+        // Create tasks from template
+        const templateTasks = tpl.tasks || [];
+        for (const t of templateTasks) {
+          await supabase.from('tasks').insert({ org_id: u.org_id, project_id: proj.id, title: t.title, description: t.description || '', priority: t.priority || 'medium', assigned_to: t.assigned_to || null });
+        }
+        return res.json({ project: proj, tasks_created: templateTasks.length });
+      }
+      if (parts[1] && method === 'DELETE') {
+        await supabase.from('project_templates').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+        return res.json({ ok: true });
+      }
+    }
+
+    // ========== CLIENT PORTAL ==========
+    if (parts[0] === 'portal') {
+      // Public access — no auth needed for token-based access
+      if (parts[1] === 'view' && parts[2]) {
+        const token = parts[2];
+        const { data: portal } = await supabase.from('client_portal_tokens').select('*, projects(*, clients(name))').eq('token', token).eq('active', true).single();
+        if (!portal) return res.status(404).json({ error: 'Portal no encontrado o inactivo' });
+        const proj = portal.projects;
+        const { data: tasks } = await supabase.from('tasks').select('title, status, priority, deadline').eq('project_id', proj.id).order('created_at', { ascending: true });
+        const { data: invoices } = await supabase.from('invoices').select('amount, status, due_date').eq('project_id', proj.id);
+        return res.json({
+          project: { name: proj.name, description: proj.description, status: proj.status, budget: proj.budget, cost: proj.cost, deadline: proj.deadline, client_name: proj.clients?.name },
+          tasks: tasks || [],
+          invoices: invoices || []
+        });
+      }
+      // Generate/manage tokens — auth required
+      const u = ownerOnly(req, res); if (!u) return;
+      if (method === 'GET') {
+        const { data } = await supabase.from('client_portal_tokens').select('*, projects(name)').eq('org_id', u.org_id);
+        return res.json((data || []).map(t => ({ ...t, project_name: t.projects?.name, projects: undefined })));
+      }
+      if (method === 'POST') {
+        const { project_id } = req.body;
+        if (!project_id) return res.status(400).json({ error: 'Proyecto requerido' });
+        const token = require('crypto').randomBytes(24).toString('hex');
+        const { data } = await supabase.from('client_portal_tokens').insert({ org_id: u.org_id, project_id, token }).select().single();
+        return res.json({ ...data, url: `${req.headers.origin || ''}/portal/${token}` });
+      }
+      if (parts[1] && method === 'DELETE') {
+        await supabase.from('client_portal_tokens').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+        return res.json({ ok: true });
+      }
+    }
+
+    // ========== WEBHOOKS ==========
+    if (parts[0] === 'webhooks') {
+      const u = ownerOnly(req, res); if (!u) return;
+      if (!parts[1]) {
+        if (method === 'GET') {
+          const { data } = await supabase.from('webhooks').select('*').eq('org_id', u.org_id);
+          return res.json(data || []);
+        }
+        if (method === 'POST') {
+          const { event, url } = req.body;
+          if (!event || !url) return res.status(400).json({ error: 'Evento y URL requeridos' });
+          const { data } = await supabase.from('webhooks').insert({ org_id: u.org_id, event, url }).select().single();
+          return res.json(data);
+        }
+      }
+      if (parts[1] && method === 'DELETE') {
+        await supabase.from('webhooks').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+        return res.json({ ok: true });
+      }
+    }
+
+    // ========== AI ASSISTANT ==========
+    if (parts[0] === 'ai') {
+      const u = auth(req, res); if (!u) return;
+      if (parts[1] === 'generate' && method === 'POST') {
+        const { type, context } = req.body;
+        if (!type) return res.status(400).json({ error: 'Tipo requerido' });
+        const CLAUDE_KEY = process.env.ANTHROPIC_API_KEY;
+        if (!CLAUDE_KEY) return res.status(500).json({ error: 'API key no configurada' });
+
+        const prompts = {
+          proposal: `Genera una propuesta comercial profesional para un proyecto de desarrollo web. Contexto: ${context}. Responde en español, formato markdown, máximo 500 palabras.`,
+          summary: `Resume esta información de reunión/proyecto de forma clara y concisa. Contexto: ${context}. Responde en español, máximo 300 palabras.`,
+          estimate: `Basándote en este contexto, sugiere un presupuesto y timeline realista para el proyecto. Contexto: ${context}. Responde en español con rangos de precio en USD y tiempos estimados.`,
+          tasks: `Genera una lista de tareas técnicas para este proyecto. Contexto: ${context}. Responde en español, formato JSON array con objetos {title, description, priority}. Solo el JSON, sin texto extra.`,
+        };
+
+        const prompt = prompts[type] || `${type}: ${context}`;
+
+        try {
+          const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': CLAUDE_KEY, 'anthropic-version': '2023-06-01' },
+            body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1024, messages: [{ role: 'user', content: prompt }] })
+          });
+          const aiData = await aiRes.json();
+          const text = aiData.content?.[0]?.text || 'Sin respuesta';
+          // Log usage
+          await supabase.from('ai_logs').insert({ org_id: u.org_id, user_id: u.id, type, prompt: context, response: text });
+          return res.json({ result: text, type });
+        } catch (e) {
+          return res.status(500).json({ error: 'Error al generar con IA: ' + e.message });
+        }
+      }
+    }
+
+    // ========== EMAIL NOTIFICATIONS ==========
+    if (parts[0] === 'email' && parts[1] === 'send' && method === 'POST') {
+      const u = auth(req, res); if (!u) return;
+      const RESEND_KEY = process.env.RESEND_API_KEY;
+      if (!RESEND_KEY) return res.status(500).json({ error: 'Resend no configurado' });
+      const { to, subject, html } = req.body;
+      try {
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_KEY}` },
+          body: JSON.stringify({ from: 'Profit Code <noreply@profitcode.app>', to, subject, html })
+        });
+        const emailData = await emailRes.json();
+        return res.json(emailData);
+      } catch (e) {
+        return res.status(500).json({ error: 'Error enviando email' });
+      }
+    }
+
     return res.status(404).json({ error: 'Not found' });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Error del servidor' });
   }
 };
+
+// Fire webhooks in background (non-blocking)
+async function fireWebhooks(orgId, event, payload) {
+  try {
+    const { data } = await supabase.from('webhooks').select('url').eq('org_id', orgId).eq('event', event).eq('active', true);
+    if (data) data.forEach(w => fetch(w.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event, payload, timestamp: new Date().toISOString() }) }).catch(() => {}));
+  } catch {}
+}

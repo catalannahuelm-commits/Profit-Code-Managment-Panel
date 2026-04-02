@@ -1,0 +1,59 @@
+<div class="timetrack-page">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+    <button class="btn btn-primary" id="btn-new-time" onclick="Pages.timetrack.openNew()">+ Registrar Tiempo</button>
+  </div>
+
+  <div class="meetings-kpi-grid" id="time-kpis"></div>
+
+  <div class="meetings-layout">
+    <!-- Timer -->
+    <div class="meetings-calendar-card">
+      <h3 id="time-log-title">Registro de hoy</h3>
+      <div id="time-today-list"></div>
+    </div>
+    <!-- History -->
+    <div class="meetings-list-card">
+      <h3 id="time-history-title">Historial</h3>
+      <div id="time-history-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-time">
+    <div class="modal">
+      <h2>Registrar Tiempo</h2>
+      <form id="form-time">
+        <div class="form-group">
+          <label>Proyecto</label>
+          <select id="time-project"><option value="">Sin proyecto</option></select>
+        </div>
+        <div class="form-group">
+          <label>Tarea</label>
+          <select id="time-task"><option value="">Sin tarea</option></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label>Horas</label>
+            <input type="number" id="time-hours" min="0" max="24" value="1">
+          </div>
+          <div class="form-group">
+            <label>Minutos</label>
+            <input type="number" id="time-minutes" min="0" max="59" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="time-date">
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <input type="text" id="time-desc" placeholder="¿Qué hiciste?">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-time').classList.remove('active')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

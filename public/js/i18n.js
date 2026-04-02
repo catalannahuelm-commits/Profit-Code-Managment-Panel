@@ -308,6 +308,33 @@ const I18N = {
     meetings_created: 'Reunión creada',
     meetings_deleted: 'Reunión eliminada',
 
+    // Chat
+    nav_chat: 'Chat',
+    page_chat: 'Chat del Equipo',
+    page_chat_sub: 'Comunicación interna',
+    chat_empty: 'Sin mensajes todavía',
+
+    // Time tracking
+    nav_timetrack: 'Tiempo',
+    page_timetrack: 'Control de Tiempo',
+    page_timetrack_sub: 'Registra horas por tarea y proyecto',
+    time_today: 'Hoy',
+    time_week: 'Esta Semana',
+    time_month: 'Este Mes',
+    time_total: 'Total',
+    time_no_entries: 'Sin registros hoy',
+    time_no_history: 'Sin historial',
+    time_no_desc: 'Sin descripción',
+    time_no_task: 'Sin tarea',
+    time_created: 'Tiempo registrado',
+
+    // AI
+    nav_ai: 'IA',
+    page_ai: 'Asistente IA',
+    page_ai_sub: 'Genera propuestas, presupuestos y tareas con IA',
+    ai_no_context: 'Escribí un contexto primero',
+    ai_copied: 'Copiado al portapapeles',
+
     // Language
     lang_label: 'Idioma',
   },
@@ -602,6 +629,30 @@ const I18N = {
     meetings_created: 'Meeting created',
     meetings_deleted: 'Meeting deleted',
 
+    nav_chat: 'Chat',
+    page_chat: 'Team Chat',
+    page_chat_sub: 'Internal communication',
+    chat_empty: 'No messages yet',
+
+    nav_timetrack: 'Time',
+    page_timetrack: 'Time Tracking',
+    page_timetrack_sub: 'Track hours by task and project',
+    time_today: 'Today',
+    time_week: 'This Week',
+    time_month: 'This Month',
+    time_total: 'Total',
+    time_no_entries: 'No entries today',
+    time_no_history: 'No history',
+    time_no_desc: 'No description',
+    time_no_task: 'No task',
+    time_created: 'Time logged',
+
+    nav_ai: 'AI',
+    page_ai: 'AI Assistant',
+    page_ai_sub: 'Generate proposals, budgets and tasks with AI',
+    ai_no_context: 'Write a context first',
+    ai_copied: 'Copied to clipboard',
+
     lang_label: 'Language',
   },
 
@@ -894,6 +945,30 @@ const I18N = {
     meetings_new: '+ Nova Reunião',
     meetings_created: 'Reunião criada',
     meetings_deleted: 'Reunião excluída',
+
+    nav_chat: 'Chat',
+    page_chat: 'Chat da Equipe',
+    page_chat_sub: 'Comunicação interna',
+    chat_empty: 'Sem mensagens ainda',
+
+    nav_timetrack: 'Tempo',
+    page_timetrack: 'Controle de Tempo',
+    page_timetrack_sub: 'Registre horas por tarefa e projeto',
+    time_today: 'Hoje',
+    time_week: 'Esta Semana',
+    time_month: 'Este Mês',
+    time_total: 'Total',
+    time_no_entries: 'Sem registros hoje',
+    time_no_history: 'Sem histórico',
+    time_no_desc: 'Sem descrição',
+    time_no_task: 'Sem tarefa',
+    time_created: 'Tempo registrado',
+
+    nav_ai: 'IA',
+    page_ai: 'Assistente IA',
+    page_ai_sub: 'Gere propostas, orçamentos e tarefas com IA',
+    ai_no_context: 'Escreva um contexto primeiro',
+    ai_copied: 'Copiado para a área de transferência',
 
     lang_label: 'Idioma',
   }
