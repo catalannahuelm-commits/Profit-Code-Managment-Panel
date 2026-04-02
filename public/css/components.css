@@ -4306,5 +4306,115 @@ tr:hover {
   box-shadow: 0 12px 40px rgba(0,0,0,0.12);
 }
 
+/* === ONBOARDING === */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: confirmFadeIn 0.3s ease;
+}
+
+.onboarding-box {
+  background: #150b28;
+  border: 1px solid rgba(123,108,246,0.25);
+  border-radius: 20px;
+  padding: 40px;
+  width: 520px;
+  max-width: 95vw;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 60px rgba(123,108,246,0.12);
+  animation: confirmSlideIn 0.4s cubic-bezier(0.16,1,0.3,1);
+  text-align: center;
+  position: relative;
+}
+
+.onboarding-step-indicator {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(123,108,246,0.2);
+  transition: all 0.3s ease;
+}
+
+.onboarding-dot.active {
+  background: var(--primary);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.onboarding-dot.done {
+  background: #1DB954;
+}
+
+.onboarding-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.onboarding-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+}
+
+.onboarding-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.onboarding-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.onboarding-btn-skip {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.onboarding-btn-skip:hover {
+  background: rgba(123,108,246,0.08);
+}
+
+.onboarding-btn-next {
+  padding: 12px 32px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #7B6CF6, #6558E0);
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(123,108,246,0.3);
+}
+
+.onboarding-btn-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(123,108,246,0.4);
+}
+
 /* === TIMETRACK === */
 .timetrack-page { animation: pageIn 0.35s ease-out; }

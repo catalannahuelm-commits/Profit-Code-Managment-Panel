@@ -96,6 +96,9 @@ function renderProjectCards(projects) {
         <div class="project-badges" style="display:flex;justify-content:space-between;align-items:center;">
           <span class="badge" style="background:${st.color}15;color:${st.color}">${st.icon} ${st.label}</span>
           <div class="card-actions">
+            <button class="card-action-btn" onclick="event.stopPropagation();Pages.projects.sharePortal(${p.id})" title="Portal cliente">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </button>
             <button class="card-action-btn" onclick="event.stopPropagation();Pages.projects.openEdit(${p.id})" title="${t('edit')}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
@@ -182,6 +185,17 @@ window.Pages.projects.openEdit = async function(id) {
     clearCache('/api/projects');
     window.Pages.projects();
   };
+};
+
+window.Pages.projects.sharePortal = async function(projectId) {
+  try {
+    const result = await API.createPortalToken(projectId);
+    const url = window.location.origin + '/portal/' + result.token;
+    await navigator.clipboard.writeText(url);
+    showToast('Link copiado: ' + url);
+  } catch (err) {
+    showToast(err.message);
+  }
 };
 
 window.Pages.projects.openNew = async function() {

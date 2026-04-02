@@ -1,7 +1,8 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/((?!api/|dist/|img/|pages/|css/|js/).*)", "destination": "/index.html" }
+    { "source": "/portal/(.*)", "destination": "/portal.html" },
+    { "source": "/((?!api/|dist/|img/|pages/|css/|js/|portal).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

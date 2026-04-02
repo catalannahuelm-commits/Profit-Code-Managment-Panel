@@ -3,7 +3,7 @@
 window.currentUser = null;
 window._currentPage = null;
 const _pageCache = {};
-const _appVersion = '19';
+const _appVersion = '20';
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -116,6 +116,7 @@ function showApp() {
 
   const defaultPage = window.currentUser.role === 'owner' ? 'dashboard' : 'tasks';
   navigateTo(defaultPage);
+  showOnboarding();
 
   // Prefetch all pages in background
   setTimeout(() => {
@@ -189,6 +190,57 @@ async function navigateTo(page) {
         <p>Error</p>
       </div>`;
   }
+}
+
+// Onboarding wizard
+function showOnboarding() {
+  if (localStorage.getItem('onboarding-done')) return;
+
+  const steps = [
+    { icon: '👋', title: t('onboarding_welcome') || '¡Bienvenido a Profit Code!', desc: t('onboarding_welcome_desc') || 'Tu panel de gestión está listo. Te mostramos cómo funciona en 30 segundos.' },
+    { icon: '👥', title: t('onboarding_clients') || 'Clientes y Pipeline', desc: t('onboarding_clients_desc') || 'Cargá tus clientes y arrastralos por las etapas del pipeline: Lead → Propuesta → Desarrollo → Entregado → Cobrado.' },
+    { icon: '📁', title: t('onboarding_projects') || 'Proyectos y Tareas', desc: t('onboarding_projects_desc') || 'Creá proyectos, asigná tareas a tu equipo, y controlá el progreso con deadlines y prioridades.' },
+    { icon: '💰', title: t('onboarding_billing') || 'Facturación y Gastos', desc: t('onboarding_billing_desc') || 'Registrá facturas por proyecto, controlá tus gastos, y tené siempre claro tu ganancia neta.' },
+    { icon: '🤖', title: t('onboarding_ai') || 'IA y más', desc: t('onboarding_ai_desc') || 'Usá la IA para generar propuestas, chatear con tu equipo, trackear tiempo, y compartir progreso con clientes.' },
+    { icon: '🚀', title: t('onboarding_ready') || '¡Listo para arrancar!', desc: t('onboarding_ready_desc') || 'Empezá creando tu primer cliente desde el Pipeline. Cualquier duda, explorá cada sección del sidebar.' },
+  ];
+
+  let current = 0;
+
+  function render() {
+    const existing = document.querySelector('.onboarding-overlay');
+    if (existing) existing.remove();
+
+    const s = steps[current];
+    const overlay = document.createElement('div');
+    overlay.className = 'onboarding-overlay';
+    overlay.innerHTML = `
+      <div class="onboarding-box">
+        <div class="onboarding-step-indicator">
+          ${steps.map((_, i) => `<div class="onboarding-dot ${i < current ? 'done' : ''} ${i === current ? 'active' : ''}"></div>`).join('')}
+        </div>
+        <div class="onboarding-icon">${s.icon}</div>
+        <div class="onboarding-title">${s.title}</div>
+        <div class="onboarding-desc">${s.desc}</div>
+        <div class="onboarding-actions">
+          <button class="onboarding-btn-skip" id="ob-skip">${current === steps.length - 1 ? '' : (t('onboarding_skip') || 'Saltar')}</button>
+          <button class="onboarding-btn-next" id="ob-next">${current === steps.length - 1 ? (t('onboarding_start') || '¡Empezar!') : (t('onboarding_next') || 'Siguiente →')}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#ob-next').onclick = () => {
+      if (current < steps.length - 1) { current++; render(); }
+      else { overlay.remove(); localStorage.setItem('onboarding-done', '1'); }
+    };
+    overlay.querySelector('#ob-skip').onclick = () => {
+      overlay.remove(); localStorage.setItem('onboarding-done', '1');
+    };
+  }
+
+  setTimeout(render, 1000);
 }
 
 // Global search
