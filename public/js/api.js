@@ -115,12 +115,17 @@ const API = {
   updateProfile(data) { return this.request('PUT', '/api/profile', data); },
   updatePassword(data) { return this.request('PUT', '/api/profile/password', data); },
   async uploadAvatar(file) {
-    const form = new FormData();
-    form.append('avatar', file);
-    const res = await fetch('/api/profile/avatar', { method: 'POST', body: form });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || 'Error al subir avatar');
-    return json;
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const json = await this.request('POST', '/api/profile/avatar', { image: reader.result });
+          resolve(json);
+        } catch (e) { reject(e); }
+      };
+      reader.onerror = () => reject(new Error('Error leyendo archivo'));
+      reader.readAsDataURL(file);
+    });
   },
 
   // Badges

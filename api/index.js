@@ -339,7 +339,19 @@ module.exports = async (req, res) => {
       }
       if (parts[1] === 'avatar' && method === 'POST') {
         const u = auth(req, res); if (!u) return;
-        return res.json({ avatar: null, message: 'Avatar upload not supported on serverless' });
+        const { image } = req.body;
+        if (!image) return res.status(400).json({ error: 'Imagen requerida' });
+        const match = image.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (!match) return res.status(400).json({ error: 'Formato inválido' });
+        const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+        const buffer = Buffer.from(match[2], 'base64');
+        const fileName = `${u.org_id}/${u.id}.${ext}`;
+        const { error: upErr } = await supabase.storage.from('avatars').upload(fileName, buffer, { contentType: `image/${match[1]}`, upsert: true });
+        if (upErr) return res.status(500).json({ error: 'Error subiendo: ' + upErr.message });
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+        const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+        await supabase.from('users').update({ avatar: avatarUrl }).eq('id', u.id);
+        return res.json({ avatar: avatarUrl });
       }
       if (parts[1] === 'password' && method === 'PUT') {
         const u = auth(req, res); if (!u) return;
