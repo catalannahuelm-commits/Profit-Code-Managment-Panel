@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="/dist/app.min.css?v=31">
+  <link rel="stylesheet" href="/dist/app.min.css?v=32">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" media="print" onload="this.media='all'">
   <style>
     /* Critical inline — skeleton loading */
@@ -271,30 +271,40 @@
     window.Pages = {};
 
     // Custom confirm dialog — replaces native confirm()
-    function confirmDialog(message, title) {
+    function confirmDialog(message, opts) {
+      if (typeof opts === 'string') opts = { title: opts };
+      opts = opts || {};
+      var type = opts.type || 'danger';
+      var btnText = opts.btnText || (type === 'success' ? 'Confirmar' : 'Eliminar');
+      var icon = type === 'success'
+        ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>'
+        : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+      var iconBg = type === 'success' ? 'rgba(29,185,84,0.12)' : 'rgba(231,76,60,0.12)';
+      var iconColor = type === 'success' ? '#1DB954' : '#E74C3C';
+      var btnClass = type === 'success' ? 'btn-confirm-success' : 'btn-confirm-delete';
       return new Promise(function(resolve) {
         var overlay = document.createElement('div');
         overlay.className = 'confirm-overlay';
         overlay.innerHTML =
           '<div class="confirm-box">' +
-            '<div class="confirm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>' +
-            '<div class="confirm-title">' + (title || '¿Estás seguro?') + '</div>' +
+            '<div class="confirm-icon" style="background:'+iconBg+'"><div style="color:'+iconColor+'">'+icon+'</div></div>' +
+            '<div class="confirm-title">' + (opts.title || '¿Estás seguro?') + '</div>' +
             '<div class="confirm-text">' + message + '</div>' +
             '<div class="confirm-actions">' +
               '<button class="btn-confirm-cancel">Cancelar</button>' +
-              '<button class="btn-confirm-delete">Eliminar</button>' +
+              '<button class="'+btnClass+'">'+btnText+'</button>' +
             '</div>' +
           '</div>';
 
         overlay.querySelector('.btn-confirm-cancel').onclick = function() { overlay.remove(); resolve(false); };
-        overlay.querySelector('.btn-confirm-delete').onclick = function() { overlay.remove(); resolve(true); };
+        overlay.querySelector('.'+btnClass).onclick = function() { overlay.remove(); resolve(true); };
         overlay.addEventListener('click', function(e) { if (e.target === overlay) { overlay.remove(); resolve(false); } });
         document.addEventListener('keydown', function handler(e) {
           if (e.key === 'Escape') { overlay.remove(); resolve(false); document.removeEventListener('keydown', handler); }
         });
 
         document.body.appendChild(overlay);
-        overlay.querySelector('.btn-confirm-delete').focus();
+        overlay.querySelector('.'+btnClass).focus();
       });
     }
 
@@ -341,7 +351,7 @@
     // Skeleton helper
     function showSkeleton(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
   </script>
-  <script src="/dist/app.min.js?v=31"></script>
+  <script src="/dist/app.min.js?v=32"></script>
 
   <!-- Notification panel (outside app-layout to avoid stacking context issues) -->
   <div class="notification-panel" id="notification-panel">

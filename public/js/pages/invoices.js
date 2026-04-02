@@ -178,7 +178,7 @@ function invoiceStatusLabel(status) {
 }
 
 async function markAsPaid(id) {
-  if (!(await confirmDialog(t('invoices_confirm_pay')))) return;
+  if (!(await confirmDialog(t('invoices_confirm_pay'), { type: 'success', btnText: t('invoices_collect'), title: t('invoices_collect') }))) return;
   try {
     await API.updateInvoice(id, { status: 'paid' });
     window.Pages.invoices();
