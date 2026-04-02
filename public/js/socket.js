@@ -15,6 +15,32 @@ function disconnectSocket() {
   }
 }
 
+// Fix modals inside transformed parents — move to body
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  if (modal.parentElement !== document.body) {
+    modal._originalParent = modal.parentElement;
+    modal._originalNext = modal.nextSibling;
+    document.body.appendChild(modal);
+  }
+  modal.classList.add('active');
+  modal.scrollTop = 0;
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.remove('active');
+  const form = modal.querySelector('form');
+  if (form) form.reset();
+  if (modal._originalParent) {
+    modal._originalParent.insertBefore(modal, modal._originalNext);
+    delete modal._originalParent;
+    delete modal._originalNext;
+  }
+}
+
 // === TOASTS ===
 function showToast(message) {
   const container = document.getElementById('toast-container');

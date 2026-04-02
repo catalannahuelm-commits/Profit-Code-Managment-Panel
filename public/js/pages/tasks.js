@@ -161,43 +161,47 @@ function renderTasks(tasks) {
     </div>`;
   }).join('');
 
-  // Dropdowns
+  // Dropdowns — float menu in body to avoid overflow/z-index issues
+  function closeFloatingMenu() {
+    const old = document.getElementById('floating-status-menu');
+    if (old) old.remove();
+  }
+
   container.querySelectorAll('.task-status-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const dropdown = btn.closest('.task-status-dropdown');
-      const wasOpen = dropdown.classList.contains('open');
-      container.querySelectorAll('.task-status-dropdown.open').forEach(d => {
-        d.classList.remove('open');
-        d.closest('.task-card').style.zIndex = '';
-      });
-      if (!wasOpen) {
-        dropdown.classList.add('open');
-        dropdown.closest('.task-card').style.zIndex = '100';
-      }
-    });
-  });
-
-  container.querySelectorAll('.task-status-option').forEach(opt => {
-    opt.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const dropdown = opt.closest('.task-status-dropdown');
       const taskId = parseInt(dropdown.dataset.taskId);
-      const newStatus = opt.dataset.value;
-      dropdown.classList.remove('open');
-      dropdown.closest('.task-card').style.zIndex = '';
-      await updateTaskStatus(taskId, newStatus);
-      window.Pages.tasks();
+      const currentStatus = dropdown.dataset.current;
+      const existing = document.getElementById('floating-status-menu');
+      if (existing) { existing.remove(); return; }
+
+      const rect = btn.getBoundingClientRect();
+      const statusOpts = getStatusOptions();
+      const menu = document.createElement('div');
+      menu.id = 'floating-status-menu';
+      menu.className = 'task-status-menu';
+      menu.style.cssText = `display:block;position:fixed;top:${rect.bottom + 6}px;left:${rect.right - 170}px;z-index:99999;width:170px;`;
+      menu.innerHTML = statusOpts.map(s => `
+        <div class="task-status-option ${s.value === currentStatus ? 'active' : ''}" data-value="${s.value}" style="--opt-color:${s.color}">
+          <span class="task-status-opt-dot" style="background:${s.color}"></span>
+          ${esc(s.label)}
+        </div>
+      `).join('');
+      document.body.appendChild(menu);
+
+      menu.querySelectorAll('.task-status-option').forEach(opt => {
+        opt.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          menu.remove();
+          await updateTaskStatus(taskId, opt.dataset.value);
+          window.Pages.tasks();
+        });
+      });
     });
   });
 
-  // Close on outside click
-  document.addEventListener('click', () => {
-    container.querySelectorAll('.task-status-dropdown.open').forEach(d => {
-      d.classList.remove('open');
-      d.closest('.task-card').style.zIndex = '';
-    });
-  });
+  document.addEventListener('click', closeFloatingMenu);
 }
 
 function statusText(status) {
@@ -233,7 +237,7 @@ window.Pages.tasks.openNew = async function() {
   document.getElementById('task-assign').innerHTML = `<option value="">${t('tasks_unassigned')}</option>` +
     users.map(u => `<option value="${u.id}">${esc(u.name)}</option>`).join('');
 
-  document.getElementById('modal-task').classList.add('active');
+  openModal('modal-task');
   upgradeSelects(document.getElementById('modal-task'));
   initDatePickers(document.getElementById('modal-task'));
   document.getElementById('modal-task-title').textContent = t('tasks_modal_title');
@@ -249,7 +253,7 @@ window.Pages.tasks.openNew = async function() {
       priority: document.getElementById('task-priority').value,
       deadline: document.getElementById('task-deadline').value || null,
     });
-    document.getElementById('modal-task').classList.remove('active');
+    closeModal('modal-task');
     document.getElementById('form-task').reset();
     window.Pages.tasks();
   };

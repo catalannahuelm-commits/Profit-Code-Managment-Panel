@@ -26,7 +26,7 @@ function auth(req, res) {
 function ownerOnly(req, res) {
   const u = auth(req, res);
   if (!u) return null;
-  if (u.role !== 'owner') { res.status(403).json({ error: 'Acceso denegado' }); return null; }
+  if (u.role !== 'owner' && u.role !== 'admin') { res.status(403).json({ error: 'Acceso denegado' }); return null; }
   return u;
 }
 
@@ -172,6 +172,14 @@ module.exports = async (req, res) => {
           const { project_id, assigned_to, title, description, priority, deadline } = req.body;
           if (!project_id || !title) return res.status(400).json({ error: 'Proyecto y título requeridos' });
           const { data } = await supabase.from('tasks').insert({ project_id, assigned_to, title, description, priority: priority || 'medium', deadline, org_id: u.org_id }).select().single();
+          // Notify assigned user
+          if (assigned_to) {
+            const { data: assignee } = await supabase.from('users').select('email, email_prefs').eq('id', assigned_to).single();
+            if (assignee?.email && (assignee.email_prefs?.task_assigned !== false)) {
+              notifyEmail(assignee.email, `Nueva tarea asignada: ${title}`, `<p style="color:#c4c4d4;">Se te asignó la tarea <strong style="color:#fff;">${title}</strong>.</p><p style="color:#8888a8;">Prioridad: ${priority || 'medium'}</p>`);
+            }
+            notifySlack(u.org_id, `📋 Nueva tarea asignada a ${assignee?.email || '?'}: *${title}*`);
+          }
           return res.status(201).json(data);
         }
       } else {
@@ -228,6 +236,7 @@ module.exports = async (req, res) => {
           const { data: proj } = await supabase.from('projects').select('client_id').eq('id', project_id).eq('org_id', u.org_id).single();
           if (!proj) return res.status(404).json({ error: 'Proyecto no encontrado' });
           const { data } = await supabase.from('invoices').insert({ project_id, client_id: proj.client_id, amount, due_date, description, org_id: u.org_id }).select().single();
+          notifySlack(u.org_id, `💰 Nueva factura creada: $${amount} — ${description || 'Sin descripción'}`);
           return res.status(201).json(data);
         }
       }
@@ -254,43 +263,99 @@ module.exports = async (req, res) => {
     if (parts[0] === 'dashboard') {
       const u = ownerOnly(req, res); if (!u) return;
       const oid = u.org_id;
-      const sixAgo = new Date(new Date().getFullYear(), new Date().getMonth() - 6, 1).toISOString().split('T')[0];
-      const curMonth = new Date().toISOString().slice(0, 7);
-      const [inv, exp, proj, cli] = await Promise.all([
-        supabase.from('invoices').select('amount, status, paid_date').eq('org_id', oid),
-        supabase.from('expenses').select('amount, date').eq('org_id', oid),
-        supabase.from('projects').select('status').eq('org_id', oid),
-        supabase.from('clients').select('pipeline_stage').eq('org_id', oid),
+      const now = new Date();
+      const sixAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1).toISOString().split('T')[0];
+      const curMonth = now.toISOString().slice(0, 7);
+      const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 7);
+      const [inv, exp, proj, cli, tsk, topCliRes] = await Promise.all([
+        supabase.from('invoices').select('amount, status, paid_date, client_id').eq('org_id', oid),
+        supabase.from('expenses').select('amount, date, category').eq('org_id', oid),
+        supabase.from('projects').select('id, name, status, budget, cost, deadline').eq('org_id', oid),
+        supabase.from('clients').select('id, name, pipeline_stage').eq('org_id', oid),
+        supabase.from('tasks').select('id, status, updated_at').eq('org_id', oid),
+        supabase.from('invoices').select('client_id, amount').eq('org_id', oid).eq('status', 'paid'),
       ]);
-      const invoices = inv.data || [], expenses = exp.data || [], projects = proj.data || [], clients = cli.data || [];
+      const invoices = inv.data || [], expenses = exp.data || [], projects = proj.data || [], clients = cli.data || [], tasks = tsk.data || [];
       const income = invoices.filter(i => i.status === 'paid' && i.paid_date?.startsWith(curMonth)).reduce((s, i) => s + i.amount, 0);
+      const prevIncome = invoices.filter(i => i.status === 'paid' && i.paid_date?.startsWith(prevMonth)).reduce((s, i) => s + i.amount, 0);
       const monthExp = expenses.filter(e => e.date?.startsWith(curMonth)).reduce((s, e) => s + e.amount, 0);
+      const prevExp = expenses.filter(e => e.date?.startsWith(prevMonth)).reduce((s, e) => s + e.amount, 0);
       const pipe = {}; clients.forEach(c => { pipe[c.pipeline_stage] = (pipe[c.pipeline_stage] || 0) + 1; });
       const mRev = {}, mExp = {};
       invoices.filter(i => i.status === 'paid' && i.paid_date >= sixAgo).forEach(i => { const m = i.paid_date.slice(0, 7); mRev[m] = (mRev[m] || 0) + i.amount; });
       expenses.filter(e => e.date >= sixAgo).forEach(e => { const m = e.date.slice(0, 7); mExp[m] = (mExp[m] || 0) + e.amount; });
+
+      // Top clients by revenue
+      const clientRevMap = {};
+      (topCliRes.data || []).forEach(i => { clientRevMap[i.client_id] = (clientRevMap[i.client_id] || 0) + i.amount; });
+      const topClients = Object.entries(clientRevMap)
+        .map(([id, revenue]) => ({ id: +id, name: (clients.find(c => c.id === +id) || {}).name || '?', revenue }))
+        .sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+      // Task stats
+      const totalTasks = tasks.length;
+      const doneTasks = tasks.filter(t => t.status === 'done').length;
+      const taskRate = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+      // Projects at risk (active + deadline within 7 days or overdue)
+      const atRisk = projects.filter(p => {
+        if (p.status !== 'active' || !p.deadline) return false;
+        const dl = new Date(p.deadline);
+        const diff = Math.ceil((dl - now) / (1000 * 60 * 60 * 24));
+        return diff <= 7;
+      }).map(p => ({ id: p.id, name: p.name, deadline: p.deadline, daysLeft: Math.ceil((new Date(p.deadline) - now) / (1000 * 60 * 60 * 24)) }));
+
+      // Monthly profit trend
+      const allMonths = new Set([...Object.keys(mRev), ...Object.keys(mExp)]);
+      const profitTrend = [...allMonths].sort().map(m => ({ month: m, profit: (mRev[m] || 0) - (mExp[m] || 0) }));
+
       return res.json({
         income, expenses: monthExp, profit: income - monthExp,
+        prevIncome, prevExpenses: prevExp, prevProfit: prevIncome - prevExp,
         activeProjects: projects.filter(p => p.status === 'active').length,
         pipeline: Object.entries(pipe).map(([pipeline_stage, count]) => ({ pipeline_stage, count })),
         monthlyRevenue: Object.entries(mRev).map(([month, total]) => ({ month, total })),
         monthlyExpenses: Object.entries(mExp).map(([month, total]) => ({ month, total })),
-        pendingInvoices: invoices.filter(i => ['pending','sent','overdue'].includes(i.status)).reduce((s, i) => s + i.amount, 0)
+        pendingInvoices: invoices.filter(i => ['pending','sent','overdue'].includes(i.status)).reduce((s, i) => s + i.amount, 0),
+        topClients, taskRate, doneTasks, totalTasks, atRisk, profitTrend,
+        totalRevenue: invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0),
+        totalExpenses: expenses.reduce((s, e) => s + e.amount, 0),
       });
     }
 
     // ========== TEAM ==========
     if (parts[0] === 'team') {
+      // Update role
+      if (parts[1] === 'role' && method === 'PUT') {
+        const u = ownerOnly(req, res); if (!u) return;
+        const { user_id, role } = req.body;
+        if (!user_id || !role) return res.status(400).json({ error: 'User ID y rol requeridos' });
+        if (!['owner','admin','manager','employee'].includes(role)) return res.status(400).json({ error: 'Rol inválido' });
+        if (+user_id === u.id && role !== 'owner') return res.status(400).json({ error: 'No podés cambiar tu propio rol' });
+        await supabase.from('users').update({ role }).eq('id', user_id).eq('org_id', u.org_id);
+        return res.json({ ok: true });
+      }
+      // Update permissions
+      if (parts[1] === 'permissions' && method === 'PUT') {
+        const u = ownerOnly(req, res); if (!u) return;
+        const { user_id, permissions } = req.body;
+        if (!user_id) return res.status(400).json({ error: 'User ID requerido' });
+        await supabase.from('users').update({ permissions: permissions || {} }).eq('id', user_id).eq('org_id', u.org_id);
+        return res.json({ ok: true });
+      }
+      if (parts[1] === 'invite') { /* handled below */ }
+      else {
       const u = ownerOnly(req, res); if (!u) return;
       const [usersRes, tasksRes] = await Promise.all([
-        supabase.from('users').select('id, name, role').eq('org_id', u.org_id),
+        supabase.from('users').select('id, name, email, role, permissions').eq('org_id', u.org_id),
         supabase.from('tasks').select('assigned_to, status').eq('org_id', u.org_id)
       ]);
       const users = usersRes.data || [], tasks = tasksRes.data || [];
       return res.json(users.map(u => {
         const ut = tasks.filter(t => t.assigned_to === u.id);
-        return { id: u.id, name: u.name, role: u.role, pending: ut.filter(t => t.status === 'pending').length, in_progress: ut.filter(t => t.status === 'in_progress').length, done: ut.filter(t => t.status === 'done').length, total: ut.length };
+        return { id: u.id, name: u.name, email: u.email, role: u.role, permissions: u.permissions || {}, pending: ut.filter(t => t.status === 'pending').length, in_progress: ut.filter(t => t.status === 'in_progress').length, done: ut.filter(t => t.status === 'done').length, total: ut.length };
       }));
+      }
     }
 
     // ========== MEETINGS ==========
@@ -310,6 +375,16 @@ module.exports = async (req, res) => {
             date, time_start: time_start || null, time_end: time_end || null,
             attendees: attendees || []
           }).select().single();
+          // Notify attendees
+          if (attendees?.length) {
+            const { data: users } = await supabase.from('users').select('email, email_prefs').in('id', attendees).eq('org_id', u.org_id);
+            (users || []).forEach(att => {
+              if (att.email && att.email_prefs?.meeting_created !== false) {
+                notifyEmail(att.email, `Nueva reunión: ${title}`, `<p style="color:#c4c4d4;">Fuiste invitado a <strong style="color:#fff;">${title}</strong></p><p style="color:#8888a8;">Fecha: ${date} ${time_start ? '| ' + time_start : ''}</p>`);
+              }
+            });
+          }
+          notifySlack(u.org_id, `📅 Nueva reunión: *${title}* — ${date} ${time_start || ''}`);
           return res.status(201).json(data);
         }
       } else {
@@ -582,9 +657,17 @@ module.exports = async (req, res) => {
         }
         return res.json({ project: proj, tasks_created: templateTasks.length });
       }
-      if (parts[1] && method === 'DELETE') {
-        await supabase.from('project_templates').delete().eq('id', parts[1]).eq('org_id', u.org_id);
-        return res.json({ ok: true });
+      if (parts[1] && parts[1] !== 'apply') {
+        if (method === 'PUT') {
+          const updates = {};
+          ['name','description','tasks'].forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+          const { data } = await supabase.from('project_templates').update(updates).eq('id', parts[1]).eq('org_id', u.org_id).select().single();
+          return res.json(data);
+        }
+        if (method === 'DELETE') {
+          await supabase.from('project_templates').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+          return res.json({ ok: true });
+        }
       }
     }
 
@@ -680,21 +763,67 @@ module.exports = async (req, res) => {
     }
 
     // ========== EMAIL NOTIFICATIONS ==========
-    if (parts[0] === 'email' && parts[1] === 'send' && method === 'POST') {
+    if (parts[0] === 'email') {
+      if (parts[1] === 'send' && method === 'POST') {
+        const u = auth(req, res); if (!u) return;
+        const { to, subject, html } = req.body;
+        const result = await sendEmail(to, subject, html);
+        if (result.error) return res.status(500).json(result);
+        return res.json(result);
+      }
+      // Get/update notification preferences
+      if (parts[1] === 'preferences') {
+        const u = auth(req, res); if (!u) return;
+        if (method === 'GET') {
+          const { data } = await supabase.from('users').select('email_prefs').eq('id', u.id).single();
+          return res.json(data?.email_prefs || { task_assigned: true, invoice_created: true, meeting_created: true, project_status: true, weekly_report: true });
+        }
+        if (method === 'PUT') {
+          await supabase.from('users').update({ email_prefs: req.body }).eq('id', u.id);
+          return res.json({ ok: true });
+        }
+      }
+    }
+
+    // ========== CALENDAR EXPORT ==========
+    if (parts[0] === 'calendar' && parts[1] === 'export') {
       const u = auth(req, res); if (!u) return;
-      const RESEND_KEY = process.env.RESEND_API_KEY;
-      if (!RESEND_KEY) return res.status(500).json({ error: 'Resend no configurado' });
-      const { to, subject, html } = req.body;
-      try {
-        const emailRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_KEY}` },
-          body: JSON.stringify({ from: 'Profit Code <noreply@profitcode.app>', to, subject, html })
-        });
-        const emailData = await emailRes.json();
-        return res.json(emailData);
-      } catch (e) {
-        return res.status(500).json({ error: 'Error enviando email' });
+      const { data: meetings } = await supabase.from('meetings').select('*').eq('org_id', u.org_id);
+      const events = (meetings || []).map(m => {
+        const dtStart = m.date.replace(/-/g, '') + (m.time_start ? 'T' + m.time_start.replace(':', '') + '00' : 'T090000');
+        const dtEnd = m.date.replace(/-/g, '') + (m.time_end ? 'T' + m.time_end.replace(':', '') + '00' : 'T100000');
+        return `BEGIN:VEVENT\r\nDTSTART:${dtStart}\r\nDTEND:${dtEnd}\r\nSUMMARY:${(m.title || '').replace(/[,;\\]/g, '')}\r\nDESCRIPTION:${(m.description || '').replace(/[,;\\]/g, '')}\r\nUID:profit-${m.id}@profitcode.app\r\nEND:VEVENT`;
+      }).join('\r\n');
+      const ical = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Profit Code//Meetings//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR`;
+      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="profit-code-meetings.ics"');
+      return res.send(ical);
+    }
+
+    // ========== INTEGRATIONS (Slack) ==========
+    if (parts[0] === 'integrations') {
+      const u = ownerOnly(req, res); if (!u) return;
+      if (method === 'GET') {
+        const { data } = await supabase.from('organizations').select('integrations').eq('id', u.org_id).single();
+        return res.json(data?.integrations || {});
+      }
+      if (method === 'PUT') {
+        await supabase.from('organizations').update({ integrations: req.body }).eq('id', u.org_id);
+        return res.json({ ok: true });
+      }
+      if (parts[1] === 'slack-test' && method === 'POST') {
+        const { webhook_url } = req.body;
+        if (!webhook_url) return res.status(400).json({ error: 'URL requerida' });
+        try {
+          await fetch(webhook_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: '✅ Profit Code conectado correctamente!' })
+          });
+          return res.json({ ok: true });
+        } catch (e) {
+          return res.status(400).json({ error: 'No se pudo conectar con Slack' });
+        }
       }
     }
 
@@ -704,6 +833,43 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'Error del servidor' });
   }
 };
+
+// Send email via Resend (non-blocking helper)
+async function sendEmail(to, subject, html) {
+  const RESEND_KEY = process.env.RESEND_API_KEY;
+  if (!RESEND_KEY) return { error: 'Resend no configurado' };
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_KEY}` },
+      body: JSON.stringify({ from: 'Profit Code <noreply@profitcode.app>', to: Array.isArray(to) ? to : [to], subject, html })
+    });
+    return await res.json();
+  } catch (e) {
+    return { error: 'Error enviando email' };
+  }
+}
+
+// Send email notification (background, non-blocking)
+function notifyEmail(to, subject, bodyHtml) {
+  const template = `<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:0 auto;background:#0d0a1a;color:#c4c4d4;padding:32px;border-radius:12px;">
+    <div style="text-align:center;margin-bottom:24px;"><span style="color:#7B6CF6;font-weight:700;font-size:14px;letter-spacing:0.1em;">⚡ PROFIT CODE</span></div>
+    <h2 style="color:#fff;font-size:18px;margin-bottom:16px;">${subject}</h2>
+    ${bodyHtml}
+    <div style="margin-top:32px;padding-top:16px;border-top:1px solid rgba(123,108,246,0.12);text-align:center;font-size:12px;color:#8888a8;">Profit Code — Panel de Gestión para Agencias</div>
+  </div>`;
+  sendEmail(to, subject, template).catch(() => {});
+}
+
+// Send Slack notification (background, non-blocking)
+async function notifySlack(orgId, text) {
+  try {
+    const { data } = await supabase.from('organizations').select('integrations').eq('id', orgId).single();
+    const slackUrl = data?.integrations?.slack_webhook;
+    if (!slackUrl) return;
+    fetch(slackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) }).catch(() => {});
+  } catch {}
+}
 
 // Fire webhooks in background (non-blocking)
 async function fireWebhooks(orgId, event, payload) {

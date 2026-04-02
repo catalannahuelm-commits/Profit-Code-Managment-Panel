@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="/dist/app.min.css?v=21">
+  <link rel="stylesheet" href="/dist/app.min.css?v=29">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" media="print" onload="this.media='all'">
   <style>
     /* Critical inline — skeleton loading */
@@ -176,7 +176,7 @@
 
         <div class="login-footer">
           <div class="login-lang-switcher" id="login-lang-switcher"></div>
-          <p>Profit Code &copy; 2026 — Hecho con 💜</p>
+          <p>Profit Code &copy; 2026</p>
         </div>
       </div>
     </div>
@@ -307,11 +307,14 @@
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js'
       ];
       var loaded = 0;
+      var done = false;
+      function finish() { if (done) return; done = true; _libsLoaded = true; if (cb) cb(); }
       scripts.forEach(function(src) {
         var s = document.createElement('script'); s.src = src; s.async = true;
-        s.onload = function() { if (++loaded === scripts.length) { _libsLoaded = true; if (cb) cb(); } };
+        s.onload = s.onerror = function() { if (++loaded >= scripts.length) finish(); };
         document.head.appendChild(s);
       });
+      setTimeout(finish, 8000);
     }
 
     // Particles (minimal)
@@ -332,13 +335,13 @@
     function initDatePickers(c){if(typeof flatpickr==='undefined')return;(c||document).querySelectorAll('input[type="date"]').forEach(function(i){if(i._flatpickr)return;i.type='text';i.placeholder='Seleccionar fecha...';flatpickr(i,{locale:'es',dateFormat:'Y-m-d',altInput:true,altFormat:'j \\de M Y',disableMobile:true,appendTo:i.closest('.modal')||undefined,static:true,position:'auto center',monthSelectorType:'static'})})}
 
     function togglePassword(){var i=document.getElementById('login-password');i.type=i.type==='password'?'text':'password'}
-    document.addEventListener('click',function(e){if(e.target.classList.contains('modal-overlay')){e.target.classList.remove('active');var f=e.target.querySelector('form');if(f)f.reset()}});
-    document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.modal-overlay.active').forEach(function(m){m.classList.remove('active');var f=m.querySelector('form');if(f)f.reset()})});
+    document.addEventListener('click',function(e){if(e.target.classList.contains('modal-overlay')){closeModal(e.target.id)}});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.modal-overlay.active').forEach(function(m){closeModal(m.id)})});
 
     // Skeleton helper
     function showSkeleton(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
   </script>
-  <script src="/dist/app.min.js?v=21"></script>
+  <script src="/dist/app.min.js?v=29"></script>
 
   <!-- Notification panel (outside app-layout to avoid stacking context issues) -->
   <div class="notification-panel" id="notification-panel">

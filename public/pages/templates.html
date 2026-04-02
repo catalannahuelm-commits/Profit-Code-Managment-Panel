@@ -1,0 +1,60 @@
+<div style="display:flex;justify-content:flex-end;margin-bottom:24px;gap:12px;">
+  <button class="btn btn-primary" id="btn-new-template" onclick="Pages.templates.openNew()">+ Nueva Plantilla</button>
+</div>
+
+<div id="templates-grid" class="templates-grid"></div>
+
+<!-- Template modal -->
+<div class="modal-overlay" id="modal-template">
+  <div class="modal" style="max-width:640px">
+    <h2 id="template-modal-title">Nueva Plantilla</h2>
+    <form id="form-template">
+      <div class="form-group">
+        <label data-i18n="name">Nombre</label>
+        <input type="text" id="template-name" required placeholder="Ej: Landing Page">
+      </div>
+      <div class="form-group">
+        <label data-i18n="description">Descripción</label>
+        <textarea id="template-description" rows="2" placeholder="Descripción de la plantilla..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tareas de la plantilla</label>
+        <div id="template-tasks-list" class="template-tasks-list"></div>
+        <button type="button" class="btn btn-ghost" style="margin-top:8px" onclick="Pages.templates.addTaskRow()">+ Agregar tarea</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-template')">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="template-submit-btn">Crear Plantilla</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Apply template modal -->
+<div class="modal-overlay" id="modal-apply-template">
+  <div class="modal">
+    <h2 id="apply-template-title">Aplicar Plantilla</h2>
+    <form id="form-apply-template">
+      <div class="form-group">
+        <label>Cliente</label>
+        <select id="apply-client" required></select>
+      </div>
+      <div class="form-group">
+        <label>Nombre del proyecto</label>
+        <input type="text" id="apply-project-name" required placeholder="Nombre del proyecto">
+      </div>
+      <div class="form-group">
+        <label>Presupuesto ($)</label>
+        <input type="number" id="apply-budget" step="0.01" value="0">
+      </div>
+      <div class="form-group">
+        <label>Fecha de entrega</label>
+        <input type="date" id="apply-deadline">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-apply-template')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear Proyecto</button>
+      </div>
+    </form>
+  </div>
+</div>

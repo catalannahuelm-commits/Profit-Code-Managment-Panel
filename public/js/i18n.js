@@ -176,6 +176,10 @@ const I18N = {
     projects_invested: 'Invertido',
     projects_delivery: 'Entrega',
     projects_empty: 'No hay proyectos todavía',
+    projects_status_updated: 'Estado del proyecto actualizado',
+
+    // Clients
+    clients_stage_updated: 'Etapa actualizada',
 
     // Pipeline
     pipeline_new: '+ Nuevo Cliente',
@@ -334,6 +338,50 @@ const I18N = {
     page_ai_sub: 'Genera propuestas, presupuestos y tareas con IA',
     ai_no_context: 'Escribí un contexto primero',
     ai_copied: 'Copiado al portapapeles',
+
+    // Dashboard extended
+    dash_profit_trend: 'Tendencia de Ganancia',
+    dash_top_clients: 'Top Clientes por Ingresos',
+    dash_task_overview: 'Resumen de Tareas',
+    dash_at_risk: 'Proyectos en Riesgo',
+    dash_no_clients: 'Sin clientes con ingresos todavía',
+    dash_no_risk: 'Sin proyectos en riesgo',
+    dash_tasks_done: 'Completadas',
+    dash_tasks_pending: 'Pendientes',
+    dash_tasks_total: 'Total',
+    dash_total_revenue: 'Ingresos Totales',
+    dash_total_expenses: 'Gastos Totales',
+
+    // Templates
+    nav_templates: 'Plantillas',
+    page_templates: 'Plantillas de Proyecto',
+    page_templates_sub: 'Crea y aplica plantillas para nuevos proyectos',
+    tpl_new: '+ Nueva Plantilla',
+    tpl_create: 'Crear Plantilla',
+    tpl_edit: 'Editar Plantilla',
+    tpl_apply: 'Aplicar',
+    tpl_tasks_label: 'tareas',
+    tpl_more_tasks: 'tareas más',
+    tpl_empty: 'No hay plantillas todavía',
+    tpl_created: 'Plantilla creada',
+    tpl_updated: 'Plantilla actualizada',
+    tpl_applied: 'Proyecto creado desde plantilla',
+
+    // Roles
+    role_owner: 'Dueño',
+    role_admin: 'Admin',
+    role_manager: 'Manager',
+    role_employee: 'Empleado',
+    team_change_role: 'Cambiar Rol',
+    team_access: 'Acceso a módulos',
+    team_role_updated: 'Rol actualizado',
+    team_invite_title: 'Invitar Miembro',
+    team_invite_btn: 'Invitar',
+    team_initial_pass: 'Contraseña inicial',
+    team_role: 'Rol',
+    team_integrations: 'Integraciones',
+    team_integrations_saved: 'Integraciones guardadas',
+    team_export_cal: 'Exportar Calendario',
 
     // Language
     lang_label: 'Idioma',
@@ -653,6 +701,50 @@ const I18N = {
     ai_no_context: 'Write a context first',
     ai_copied: 'Copied to clipboard',
 
+    // Dashboard extended
+    dash_profit_trend: 'Profit Trend',
+    dash_top_clients: 'Top Clients by Revenue',
+    dash_task_overview: 'Task Overview',
+    dash_at_risk: 'Projects at Risk',
+    dash_no_clients: 'No clients with revenue yet',
+    dash_no_risk: 'No projects at risk',
+    dash_tasks_done: 'Completed',
+    dash_tasks_pending: 'Pending',
+    dash_tasks_total: 'Total',
+    dash_total_revenue: 'Total Revenue',
+    dash_total_expenses: 'Total Expenses',
+
+    // Templates
+    nav_templates: 'Templates',
+    page_templates: 'Project Templates',
+    page_templates_sub: 'Create and apply templates for new projects',
+    tpl_new: '+ New Template',
+    tpl_create: 'Create Template',
+    tpl_edit: 'Edit Template',
+    tpl_apply: 'Apply',
+    tpl_tasks_label: 'tasks',
+    tpl_more_tasks: 'more tasks',
+    tpl_empty: 'No templates yet',
+    tpl_created: 'Template created',
+    tpl_updated: 'Template updated',
+    tpl_applied: 'Project created from template',
+
+    // Roles
+    role_owner: 'Owner',
+    role_admin: 'Admin',
+    role_manager: 'Manager',
+    role_employee: 'Employee',
+    team_change_role: 'Change Role',
+    team_access: 'Module access',
+    team_role_updated: 'Role updated',
+    team_invite_title: 'Invite Member',
+    team_invite_btn: 'Invite',
+    team_initial_pass: 'Initial password',
+    team_role: 'Role',
+    team_integrations: 'Integrations',
+    team_integrations_saved: 'Integrations saved',
+    team_export_cal: 'Export Calendar',
+
     lang_label: 'Language',
   },
 
@@ -969,6 +1061,50 @@ const I18N = {
     page_ai_sub: 'Gere propostas, orçamentos e tarefas com IA',
     ai_no_context: 'Escreva um contexto primeiro',
     ai_copied: 'Copiado para a área de transferência',
+
+    // Dashboard extended
+    dash_profit_trend: 'Tendência de Lucro',
+    dash_top_clients: 'Top Clientes por Receita',
+    dash_task_overview: 'Resumo de Tarefas',
+    dash_at_risk: 'Projetos em Risco',
+    dash_no_clients: 'Sem clientes com receita ainda',
+    dash_no_risk: 'Sem projetos em risco',
+    dash_tasks_done: 'Concluídas',
+    dash_tasks_pending: 'Pendentes',
+    dash_tasks_total: 'Total',
+    dash_total_revenue: 'Receita Total',
+    dash_total_expenses: 'Despesas Totais',
+
+    // Templates
+    nav_templates: 'Modelos',
+    page_templates: 'Modelos de Projeto',
+    page_templates_sub: 'Crie e aplique modelos para novos projetos',
+    tpl_new: '+ Novo Modelo',
+    tpl_create: 'Criar Modelo',
+    tpl_edit: 'Editar Modelo',
+    tpl_apply: 'Aplicar',
+    tpl_tasks_label: 'tarefas',
+    tpl_more_tasks: 'tarefas a mais',
+    tpl_empty: 'Nenhum modelo ainda',
+    tpl_created: 'Modelo criado',
+    tpl_updated: 'Modelo atualizado',
+    tpl_applied: 'Projeto criado a partir do modelo',
+
+    // Roles
+    role_owner: 'Proprietário',
+    role_admin: 'Admin',
+    role_manager: 'Gerente',
+    role_employee: 'Funcionário',
+    team_change_role: 'Alterar Cargo',
+    team_access: 'Acesso aos módulos',
+    team_role_updated: 'Cargo atualizado',
+    team_invite_title: 'Convidar Membro',
+    team_invite_btn: 'Convidar',
+    team_initial_pass: 'Senha inicial',
+    team_role: 'Cargo',
+    team_integrations: 'Integrações',
+    team_integrations_saved: 'Integrações salvas',
+    team_export_cal: 'Exportar Calendário',
 
     lang_label: 'Idioma',
   }

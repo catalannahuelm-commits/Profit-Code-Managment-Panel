@@ -1,4 +1,12 @@
-<div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+<div style="display:flex;justify-content:flex-end;margin-bottom:24px;gap:12px;">
+  <button class="btn btn-ghost" onclick="Pages.team.openIntegrations()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span data-i18n="team_integrations">Integraciones</span>
+  </button>
+  <button class="btn btn-ghost" onclick="Pages.team.exportCalendar()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span data-i18n="team_export_cal">Exportar Calendario</span>
+  </button>
   <button class="btn btn-primary" id="btn-invite" onclick="Pages.team.openInvite()">+ Invitar Miembro</button>
 </div>
 
@@ -11,23 +19,76 @@
 <!-- Invite modal -->
 <div class="modal-overlay" id="modal-invite">
   <div class="modal">
-    <h2>Invitar Miembro</h2>
+    <h2 data-i18n="team_invite_title">Invitar Miembro</h2>
     <form id="form-invite">
       <div class="form-group">
-        <label>Nombre</label>
+        <label data-i18n="name">Nombre</label>
         <input type="text" id="invite-name" required placeholder="Nombre del miembro">
       </div>
       <div class="form-group">
-        <label>Email</label>
+        <label data-i18n="email">Email</label>
         <input type="email" id="invite-email" required placeholder="email@ejemplo.com">
       </div>
       <div class="form-group">
-        <label>Contraseña inicial</label>
+        <label data-i18n="team_initial_pass">Contraseña inicial</label>
         <input type="text" id="invite-password" required placeholder="Contraseña temporal" minlength="6">
       </div>
+      <div class="form-group">
+        <label data-i18n="team_role">Rol</label>
+        <select id="invite-role">
+          <option value="employee">Empleado</option>
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-invite').classList.remove('active')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Invitar</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-invite')" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" data-i18n="team_invite_btn">Invitar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Role edit modal -->
+<div class="modal-overlay" id="modal-role">
+  <div class="modal">
+    <h2 data-i18n="team_change_role">Cambiar Rol</h2>
+    <form id="form-role">
+      <input type="hidden" id="role-user-id">
+      <div class="form-group">
+        <label data-i18n="team_role">Rol</label>
+        <select id="role-select">
+          <option value="employee">Empleado</option>
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+          <option value="owner">Dueño</option>
+        </select>
+      </div>
+      <div class="role-permissions-info" id="role-permissions-info"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-role')" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" data-i18n="save">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Integrations modal -->
+<div class="modal-overlay" id="modal-integrations">
+  <div class="modal" style="max-width:560px">
+    <h2 data-i18n="team_integrations">Integraciones</h2>
+    <form id="form-integrations">
+      <div class="form-group">
+        <label>Slack Webhook URL</label>
+        <input type="url" id="int-slack-url" placeholder="https://hooks.slack.com/services/...">
+        <small style="color:var(--text-muted)">Recibí notificaciones de tareas, facturas y reuniones en Slack</small>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button type="button" class="btn btn-ghost" onclick="Pages.team.testSlack()" id="btn-test-slack">Test</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-integrations')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
       </div>
     </form>
   </div>

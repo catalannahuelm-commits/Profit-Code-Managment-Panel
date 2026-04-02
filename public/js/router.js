@@ -3,7 +3,7 @@
 window.currentUser = null;
 window._currentPage = null;
 const _pageCache = {};
-const _appVersion = '21';
+const _appVersion = '29';
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -17,11 +17,14 @@ const ICONS = {
   timetrack: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
   ai: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14v1a4 4 0 0 1-8 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>',
   meetings: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  templates: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
   team: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
 };
 
-const OWNER_NAV = ['dashboard','pipeline','clients','projects','tasks','invoices','expenses','meetings','timetrack','chat','ai','team'];
-const EMPLOYEE_NAV = ['tasks'];
+const OWNER_NAV = ['dashboard','pipeline','clients','projects','tasks','invoices','expenses','meetings','timetrack','templates','chat','ai','team'];
+const ADMIN_NAV = ['dashboard','pipeline','clients','projects','tasks','invoices','expenses','meetings','timetrack','templates','chat','ai','team'];
+const MANAGER_NAV = ['dashboard','clients','projects','tasks','meetings','timetrack','chat'];
+const EMPLOYEE_NAV = ['tasks','timetrack','chat','meetings'];
 
 // Theme
 function initTheme() {
@@ -77,7 +80,8 @@ function showApp() {
   const avatar = document.getElementById('header-avatar');
   if (avatar) avatar.textContent = window.currentUser.name.charAt(0).toUpperCase();
 
-  const navPages = window.currentUser.role === 'owner' ? OWNER_NAV : EMPLOYEE_NAV;
+  const roleNavMap = { owner: OWNER_NAV, admin: ADMIN_NAV, manager: MANAGER_NAV, employee: EMPLOYEE_NAV };
+  const navPages = roleNavMap[window.currentUser.role] || EMPLOYEE_NAV;
   const navContainer = document.getElementById('sidebar-nav');
   navContainer.innerHTML = navPages.map(page => {
     const label = t(`nav_${page}`);
@@ -112,16 +116,22 @@ function showApp() {
 
   connectSocket();
   updateNotificationCount();
-  loadLibs();
 
   const defaultPage = window.currentUser.role === 'owner' ? 'dashboard' : 'tasks';
   navigateTo(defaultPage);
   showOnboarding();
 
+  // Load Chart.js + Flatpickr, then re-render current page so charts appear
+  loadLibs(() => {
+    if (window._currentPage && window.Pages[window._currentPage]) {
+      window.Pages[window._currentPage]();
+    }
+  });
+
   // Prefetch all pages in background
   setTimeout(() => {
     const pages = window.currentUser.role === 'owner'
-      ? ['pipeline','clients','projects','tasks','invoices','expenses','meetings','timetrack','chat','ai','team','profile']
+      ? ['pipeline','clients','projects','tasks','invoices','expenses','meetings','timetrack','templates','chat','ai','team','profile']
       : ['profile'];
     pages.forEach(p => {
       if (!_pageCache[p]) fetch(`/pages/${p}.html?v=${_appVersion}`).then(r => r.ok ? r.text() : '').then(html => { if (html) _pageCache[p] = html; });
@@ -149,9 +159,7 @@ async function navigateTo(page) {
 
   // Close any open modals/panels and cleanup custom selects
   document.querySelectorAll('.modal-overlay.active').forEach(m => {
-    m.classList.remove('active');
-    const form = m.querySelector('form');
-    if (form) form.reset();
+    closeModal(m.id);
   });
   document.querySelectorAll('.cs-wrapper').forEach(w => w.remove());
   document.querySelectorAll('select[data-upgraded]').forEach(s => {
@@ -254,7 +262,8 @@ function showOnboarding() {
       if (current < steps.length - 1) { current++; render(); }
       else { overlay.remove(); localStorage.setItem('onboarding-done', '1'); }
     };
-    overlay.querySelector('#ob-skip').onclick = () => {
+    const skipBtn = overlay.querySelector('#ob-skip');
+    if (skipBtn) skipBtn.onclick = () => {
       overlay.remove(); localStorage.setItem('onboarding-done', '1');
     };
   }

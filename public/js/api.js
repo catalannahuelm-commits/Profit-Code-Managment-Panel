@@ -180,6 +180,19 @@ const API = {
   updateMeeting(id, data) { return this.request('PUT', `/api/meetings/${id}`, data); },
   deleteMeeting(id) { return this.request('DELETE', `/api/meetings/${id}`); },
 
+  // Team roles
+  updateRole(data) { return this.request('PUT', '/api/team/role', data); },
+  updatePermissions(data) { return this.request('PUT', '/api/team/permissions', data); },
+
+  // Email preferences
+  getEmailPrefs() { return this.request('GET', '/api/email/preferences'); },
+  updateEmailPrefs(data) { return this.request('PUT', '/api/email/preferences', data); },
+
+  // Integrations
+  getIntegrations() { return this.request('GET', '/api/integrations'); },
+  updateIntegrations(data) { return this.request('PUT', '/api/integrations', data); },
+  testSlack(webhook_url) { return this.request('POST', '/api/integrations/slack-test', { webhook_url }); },
+
   // Notes
   getNotes() { return this.request('GET', '/api/profile/notes'); },
   createNote(data) { return this.request('POST', '/api/profile/notes', data); },

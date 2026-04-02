@@ -107,7 +107,11 @@ function renderClientCards(clients) {
         ` : ''}
 
         <div class="client-stage-footer">
-          <span class="badge" style="background:${stage.color}15;color:${stage.color}">${stage.label}</span>
+          <button class="task-status-btn client-stage-btn" data-client-id="${c.id}" data-current="${c.pipeline_stage || 'lead'}" style="--status-color:${stage.color}" onclick="event.stopPropagation();Pages.clients.openStageMenu(this)">
+            <span class="task-status-dot" style="background:${stage.color}"></span>
+            ${esc(stage.label)}
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
           <div class="client-actions">
             <button class="card-action-btn" title="${t('edit')}" onclick="Pages.clients.openEdit(${c.id})">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -132,12 +136,12 @@ window.Pages.clients.delete = async function(id) {
 window.Pages.clients.openNew = function() {
   setupClientModal();
   document.getElementById('form-new-client').reset();
-  document.getElementById('modal-new-client').classList.add('active');
+  openModal('modal-new-client');
 
   document.getElementById('form-new-client').onsubmit = async (e) => {
     e.preventDefault();
     await API.createClient(getClientFormData());
-    document.getElementById('modal-new-client').classList.remove('active');
+    closeModal('modal-new-client');
     document.getElementById('form-new-client').reset();
     window.Pages.clients();
   };
@@ -152,15 +156,56 @@ window.Pages.clients.openEdit = function(id) {
   document.getElementById('new-client-email').value = c.email || '';
   document.getElementById('new-client-phone').value = c.phone || '';
   document.getElementById('new-client-notes').value = c.notes || '';
-  document.getElementById('modal-new-client').classList.add('active');
+  openModal('modal-new-client');
 
   document.getElementById('form-new-client').onsubmit = async (e) => {
     e.preventDefault();
     await API.updateClient(id, getClientFormData());
-    document.getElementById('modal-new-client').classList.remove('active');
+    closeModal('modal-new-client');
     document.getElementById('form-new-client').reset();
     window.Pages.clients();
   };
+};
+
+window.Pages.clients.openStageMenu = function(btn) {
+  const existing = document.getElementById('floating-stage-menu');
+  if (existing) { existing.remove(); return; }
+
+  const clientId = parseInt(btn.dataset.clientId);
+  const currentStage = btn.dataset.current;
+  const stages = getStageConfig();
+  const rect = btn.getBoundingClientRect();
+
+  const menu = document.createElement('div');
+  menu.id = 'floating-stage-menu';
+  menu.className = 'task-status-menu';
+  menu.style.cssText = `display:block;position:fixed;top:${rect.bottom + 6}px;left:${rect.left}px;z-index:99999;width:180px;`;
+  menu.innerHTML = Object.entries(stages).map(([key, s]) => `
+    <div class="task-status-option ${key === currentStage ? 'active' : ''}" data-value="${key}" style="--opt-color:${s.color}">
+      <span class="task-status-opt-dot" style="background:${s.color}"></span>
+      ${esc(s.label)}
+    </div>
+  `).join('');
+  document.body.appendChild(menu);
+
+  menu.querySelectorAll('.task-status-option').forEach(opt => {
+    opt.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      menu.remove();
+      await API.updateClient(clientId, { pipeline_stage: opt.dataset.value });
+      clearCache('/api/clients');
+      window.Pages.clients();
+      showToast(t('clients_stage_updated') || 'Etapa actualizada');
+    });
+  });
+
+  setTimeout(() => {
+    document.addEventListener('click', function close() {
+      const m = document.getElementById('floating-stage-menu');
+      if (m) m.remove();
+      document.removeEventListener('click', close);
+    }, { once: true });
+  }, 10);
 };
 
 function setupClientModal() {

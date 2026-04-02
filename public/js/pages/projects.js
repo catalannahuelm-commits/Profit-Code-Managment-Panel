@@ -94,7 +94,11 @@ function renderProjectCards(projects) {
         ${p.description ? `<div class="project-desc">${esc(p.description)}</div>` : ''}
 
         <div class="project-badges" style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="badge" style="background:${st.color}15;color:${st.color}">${st.icon} ${st.label}</span>
+          <button class="task-status-btn" data-project-id="${p.id}" data-current="${p.status}" style="--status-color:${st.color}" onclick="event.stopPropagation();Pages.projects.openStatusMenu(this)">
+            <span class="task-status-dot" style="background:${st.color}"></span>
+            ${st.icon} ${esc(st.label)}
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
           <div class="card-actions">
             <button class="card-action-btn" onclick="event.stopPropagation();Pages.projects.sharePortal(${p.id})" title="Portal cliente">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
@@ -149,6 +153,40 @@ function renderProjectCards(projects) {
   }).join('');
 }
 
+window.Pages.projects.openStatusMenu = function(btn) {
+  const existing = document.getElementById('floating-project-menu');
+  if (existing) { existing.remove(); return; }
+  const projectId = parseInt(btn.dataset.projectId);
+  const current = btn.dataset.current;
+  const statuses = getProjectStatus();
+  const rect = btn.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.id = 'floating-project-menu';
+  menu.className = 'task-status-menu';
+  menu.style.cssText = `display:block;position:fixed;top:${rect.bottom + 6}px;left:${rect.left}px;z-index:99999;width:180px;`;
+  menu.innerHTML = Object.entries(statuses).map(([key, s]) => `
+    <div class="task-status-option ${key === current ? 'active' : ''}" data-value="${key}" style="--opt-color:${s.color}">
+      <span class="task-status-opt-dot" style="background:${s.color}"></span>
+      ${s.icon} ${esc(s.label)}
+    </div>
+  `).join('');
+  document.body.appendChild(menu);
+  menu.querySelectorAll('.task-status-option').forEach(opt => {
+    opt.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      menu.remove();
+      await API.updateProject(projectId, { status: opt.dataset.value });
+      clearCache('/api/projects');
+      window.Pages.projects();
+      showToast(t('projects_status_updated') || 'Estado actualizado');
+    });
+  });
+  setTimeout(() => document.addEventListener('click', function close() {
+    const m = document.getElementById('floating-project-menu'); if (m) m.remove();
+    document.removeEventListener('click', close);
+  }, { once: true }), 10);
+};
+
 window.Pages.projects.delete = async function(id) {
   if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteProject(id);
@@ -167,7 +205,7 @@ window.Pages.projects.openEdit = async function(id) {
   document.getElementById('project-description').value = p.description || '';
   document.getElementById('project-budget').value = p.budget || 0;
   document.getElementById('project-deadline').value = p.deadline || '';
-  document.getElementById('modal-project').classList.add('active');
+  openModal('modal-project');
   upgradeSelects(document.getElementById('modal-project'));
   initDatePickers(document.getElementById('modal-project'));
 
@@ -180,7 +218,7 @@ window.Pages.projects.openEdit = async function(id) {
       budget: parseFloat(document.getElementById('project-budget').value) || 0,
       deadline: document.getElementById('project-deadline').value || null,
     });
-    document.getElementById('modal-project').classList.remove('active');
+    closeModal('modal-project');
     document.getElementById('form-project').reset();
     clearCache('/api/projects');
     window.Pages.projects();
@@ -204,7 +242,7 @@ window.Pages.projects.openNew = async function() {
   select.innerHTML = `<option value="">${t('projects_select_client')}</option>` +
     clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
 
-  document.getElementById('modal-project').classList.add('active');
+  openModal('modal-project');
   upgradeSelects(document.getElementById('modal-project'));
   initDatePickers(document.getElementById('modal-project'));
 
@@ -217,7 +255,7 @@ window.Pages.projects.openNew = async function() {
       budget: parseFloat(document.getElementById('project-budget').value) || 0,
       deadline: document.getElementById('project-deadline').value || null,
     });
-    document.getElementById('modal-project').classList.remove('active');
+    closeModal('modal-project');
     document.getElementById('form-project').reset();
     window.Pages.projects();
   };

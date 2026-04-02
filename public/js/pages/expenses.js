@@ -85,8 +85,8 @@ function updateExpSummary(expenses) {
         ${topCatConfig ? topCatConfig.icon.replace(/14/g, '20') : ''}
       </div>
       <div>
-        <div class="exp-kpi-value" style="color:${topCatConfig ? topCatConfig.color : 'var(--text-muted)'}">${topCatConfig ? t('expenses_cat_' + topCat[0]) : '-'}</div>
-        <div class="exp-kpi-label">${t('expenses_top_cat')}${topCat ? ` ($${topCat[1].toLocaleString()})` : ''}</div>
+        <div class="exp-kpi-value" style="color:${topCatConfig ? topCatConfig.color : 'var(--text-muted)'}">$${topCat ? topCat[1].toLocaleString() : '0'}</div>
+        <div class="exp-kpi-label">${t('expenses_top_cat')}: ${topCatConfig ? t('expenses_cat_' + topCat[0]) : '-'}</div>
       </div>
     </div>
   `;
@@ -163,7 +163,7 @@ window.Pages.expenses.openNew = async function() {
 
   document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
 
-  document.getElementById('modal-expense').classList.add('active');
+  openModal('modal-expense');
   upgradeSelects(document.getElementById('modal-expense'));
   initDatePickers(document.getElementById('modal-expense'));
 
@@ -176,7 +176,7 @@ window.Pages.expenses.openNew = async function() {
       project_id: document.getElementById('expense-project').value || null,
       date: document.getElementById('expense-date').value,
     });
-    document.getElementById('modal-expense').classList.remove('active');
+    closeModal('modal-expense');
     document.getElementById('form-expense').reset();
     window.Pages.expenses();
   };

@@ -254,7 +254,7 @@ window.Pages.meetings.openNew = async function() {
   }).join('');
 
   document.getElementById('form-meeting').reset();
-  document.getElementById('modal-meeting').classList.add('active');
+  openModal('modal-meeting');
   initDatePickers(document.getElementById('modal-meeting'));
   setupTimeInput(document.getElementById('meeting-time-start'));
   setupTimeInput(document.getElementById('meeting-time-end'));
@@ -270,7 +270,7 @@ window.Pages.meetings.openNew = async function() {
       description: document.getElementById('meeting-description').value,
       attendees,
     });
-    document.getElementById('modal-meeting').classList.remove('active');
+    closeModal('modal-meeting');
     clearCache('/api/meetings');
     window.Pages.meetings();
     showToast(t('meetings_created'));

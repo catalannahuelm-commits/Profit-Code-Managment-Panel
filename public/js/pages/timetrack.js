@@ -119,7 +119,7 @@ window.Pages.timetrack.openNew = async function() {
   document.getElementById('time-task').innerHTML = `<option value="">${t('time_no_task')}</option>` + tasks.map(t => `<option value="${t.id}">${esc(t.title)}</option>`).join('');
 
   document.getElementById('form-time').reset();
-  document.getElementById('modal-time').classList.add('active');
+  openModal('modal-time');
   upgradeSelects(document.getElementById('modal-time'));
   initDatePickers(document.getElementById('modal-time'));
 
@@ -134,7 +134,7 @@ window.Pages.timetrack.openNew = async function() {
       date: document.getElementById('time-date').value || new Date().toISOString().split('T')[0],
       description: document.getElementById('time-desc').value,
     });
-    document.getElementById('modal-time').classList.remove('active');
+    closeModal('modal-time');
     clearCache('/api/time');
     window.Pages.timetrack();
     showToast(t('time_created'));

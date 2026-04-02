@@ -277,7 +277,7 @@ window.Pages.profile.openGiveBadge = async function() {
     };
   });
 
-  document.getElementById('modal-give-badge').classList.add('active');
+  openModal('modal-give-badge');
   upgradeSelects(document.getElementById('modal-give-badge'));
 
   document.getElementById('form-give-badge').onsubmit = async (e) => {
@@ -290,7 +290,7 @@ window.Pages.profile.openGiveBadge = async function() {
         color: document.getElementById('badge-color').value,
         reason: document.getElementById('badge-reason').value,
       });
-      document.getElementById('modal-give-badge').classList.remove('active');
+      closeModal('modal-give-badge');
       document.getElementById('form-give-badge').reset();
       showToast(t('profile_badge_given'));
       const badgeData = await API.getBadges();

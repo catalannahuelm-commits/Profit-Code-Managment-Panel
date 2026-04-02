@@ -135,10 +135,11 @@ function renderInvoices(invoices) {
         <div class="inv-card-left">
           <div class="inv-card-header">
             <span class="inv-number">#${inv.id}</span>
-            <span class="inv-status-badge" style="--st-color:${st.color}">
-              <span class="inv-status-dot" style="background:${st.color}"></span>
+            <button class="task-status-btn inv-status-toggle" data-inv-id="${inv.id}" data-current="${inv.status}" style="--status-color:${st.color};font-size:0.78rem;padding:4px 12px;" onclick="event.stopPropagation();Pages.invoices.openStatusMenu(this)">
+              <span class="task-status-dot" style="background:${st.color}"></span>
               ${esc(st.label)}
-            </span>
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
           <div class="inv-card-client">
             <div class="inv-avatar">${initial}</div>
@@ -186,6 +187,41 @@ async function markAsPaid(id) {
   }
 }
 
+window.Pages.invoices.openStatusMenu = function(btn) {
+  const existing = document.getElementById('floating-inv-menu');
+  if (existing) { existing.remove(); return; }
+  const invId = parseInt(btn.dataset.invId);
+  const current = btn.dataset.current;
+  const statuses = getInvStatus();
+  const rect = btn.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.id = 'floating-inv-menu';
+  menu.className = 'task-status-menu';
+  menu.style.cssText = `display:block;position:fixed;top:${rect.bottom + 6}px;left:${rect.left}px;z-index:99999;width:170px;`;
+  menu.innerHTML = Object.entries(statuses).map(([key, s]) => `
+    <div class="task-status-option ${key === current ? 'active' : ''}" data-value="${key}" style="--opt-color:${s.color}">
+      <span class="task-status-opt-dot" style="background:${s.color}"></span>
+      ${esc(s.label)}
+    </div>
+  `).join('');
+  document.body.appendChild(menu);
+  menu.querySelectorAll('.task-status-option').forEach(opt => {
+    opt.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      menu.remove();
+      const data = { status: opt.dataset.value };
+      if (opt.dataset.value === 'paid') data.paid_date = new Date().toISOString().split('T')[0];
+      await API.updateInvoice(invId, data);
+      clearCache('/api/invoices');
+      window.Pages.invoices();
+    });
+  });
+  setTimeout(() => document.addEventListener('click', function close() {
+    const m = document.getElementById('floating-inv-menu'); if (m) m.remove();
+    document.removeEventListener('click', close);
+  }, { once: true }), 10);
+};
+
 window.Pages.invoices.delete = async function(id) {
   if (!(await confirmDialog(t('confirm_delete')))) return;
   await API.deleteInvoice(id);
@@ -198,7 +234,7 @@ window.Pages.invoices.openNew = async function() {
   document.getElementById('invoice-project').innerHTML = `<option value="">${t('tasks_select_project')}</option>` +
     projects.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.client_name) || 'sin cliente'})</option>`).join('');
 
-  document.getElementById('modal-invoice').classList.add('active');
+  openModal('modal-invoice');
   upgradeSelects(document.getElementById('modal-invoice'));
   initDatePickers(document.getElementById('modal-invoice'));
 
@@ -210,7 +246,7 @@ window.Pages.invoices.openNew = async function() {
       due_date: document.getElementById('invoice-due').value,
       description: document.getElementById('invoice-description').value,
     });
-    document.getElementById('modal-invoice').classList.remove('active');
+    closeModal('modal-invoice');
     document.getElementById('form-invoice').reset();
     window.Pages.invoices();
   };

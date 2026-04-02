@@ -87,7 +87,7 @@ window.Pages.pipeline = async function() {
         phone: document.getElementById('client-phone').value,
         notes: document.getElementById('client-notes').value,
       });
-      document.getElementById('modal-client').classList.remove('active');
+      closeModal('modal-client');
       form.reset();
       window.Pages.pipeline();
     };
@@ -115,7 +115,7 @@ function renderPipelineKPIs(clients) {
 }
 
 window.Pages.pipeline.openNewClient = function() {
-  document.getElementById('modal-client').classList.add('active');
+  openModal('modal-client');
 };
 
 window.Pages.pipeline.move = async function(clientId, newStage) {
