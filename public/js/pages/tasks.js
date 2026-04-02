@@ -114,33 +114,34 @@ function renderTasks(tasks) {
     return;
   }
 
-  container.innerHTML = tasks.map((t, i) => {
+  const delLabel = t('delete');
+  container.innerHTML = tasks.map((tk, i) => {
     const statusOpts = getStatusOptions();
     const priConfig = getPriorityConfig();
-    const current = statusOpts.find(s => s.value === t.status) || statusOpts[0];
-    const pri = priConfig[t.priority] || priConfig.medium;
+    const current = statusOpts.find(s => s.value === tk.status) || statusOpts[0];
+    const pri = priConfig[tk.priority] || priConfig.medium;
     return `
-    <div class="card task-card" data-task-id="${t.id}" style="--pri-color:${pri.color}; animation-delay:${i * 40}ms">
+    <div class="card task-card" data-task-id="${tk.id}" style="--pri-color:${pri.color}; animation-delay:${i * 40}ms">
       <div class="task-card-accent" style="background:${pri.color}"></div>
       <div class="task-card-body">
         <div class="task-card-left">
           <div class="task-card-header">
-            <strong class="task-card-title">${esc(t.title)}</strong>
+            <strong class="task-card-title">${esc(tk.title)}</strong>
           </div>
           <div class="task-card-meta">
             <span class="task-priority-tag" style="--pri-color:${pri.color}">
               <span>${pri.icon}</span> ${esc(pri.label)}
             </span>
-            ${t.project_name ? `<span class="task-card-project"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> ${esc(t.project_name)}</span>` : ''}
-            ${t.assigned_name ? `<span class="task-card-assignee"><span class="task-avatar">${esc(t.assigned_name.charAt(0))}</span> ${esc(t.assigned_name)}</span>` : ''}
+            ${tk.project_name ? `<span class="task-card-project"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> ${esc(tk.project_name)}</span>` : ''}
+            ${tk.assigned_name ? `<span class="task-card-assignee"><span class="task-avatar">${esc(tk.assigned_name.charAt(0))}</span> ${esc(tk.assigned_name)}</span>` : ''}
           </div>
         </div>
         <div class="task-card-right">
-          ${deadlineLabel(t.deadline, t.status)}
-          <button class="meeting-delete-btn" onclick="event.stopPropagation();Pages.tasks.delete(${t.id})" title="${window.t ? t('delete') : 'Eliminar'}" style="opacity:0.5">
+          ${deadlineLabel(tk.deadline, tk.status)}
+          <button class="meeting-delete-btn" onclick="event.stopPropagation();Pages.tasks.delete(${tk.id})" title="${delLabel}" style="opacity:0.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
-          <div class="task-status-dropdown" data-task-id="${t.id}" data-current="${esc(t.status)}">
+          <div class="task-status-dropdown" data-task-id="${tk.id}" data-current="${esc(tk.status)}">
             <button class="task-status-btn" style="--status-color: ${current.color}">
               <span class="task-status-dot" style="background: ${current.color}"></span>
               ${esc(current.label)}
@@ -148,7 +149,7 @@ function renderTasks(tasks) {
             </button>
             <div class="task-status-menu">
               ${statusOpts.map(s => `
-                <div class="task-status-option ${s.value === t.status ? 'active' : ''}" data-value="${s.value}" style="--opt-color: ${s.color}">
+                <div class="task-status-option ${s.value === tk.status ? 'active' : ''}" data-value="${s.value}" style="--opt-color: ${s.color}">
                   <span class="task-status-opt-dot" style="background: ${s.color}"></span>
                   ${esc(s.label)}
                 </div>
