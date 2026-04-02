@@ -988,14 +988,19 @@
 }
 
 .toast {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: #1a1030;
+  border: 1px solid rgba(123,108,246,0.3);
   border-left: 4px solid var(--primary);
   border-radius: var(--radius-sm);
   padding: 14px 18px;
   max-width: 340px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
   animation: toastIn 0.3s ease;
+}
+[data-theme="light"] .toast {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
 }
 
 .toast-title { color: var(--text-heading); font-weight: 600; font-size: 0.8rem; margin-bottom: 3px; }

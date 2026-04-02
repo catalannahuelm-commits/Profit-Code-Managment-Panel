@@ -4422,6 +4422,28 @@ tr:hover {
   box-shadow: 0 6px 24px rgba(123,108,246,0.4);
 }
 
+/* === CHAT BADGE === */
+.chat-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: #E74C3C;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  animation: kpiEnter 0.3s ease both;
+  pointer-events: none;
+}
+
+.sidebar-nav a { position: relative; }
+
 /* === TIMETRACK === */
 .timetrack-page { animation: pageIn 0.35s ease-out; }
 

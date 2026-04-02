@@ -1,11 +1,82 @@
 // Notifications via polling (no Socket.io needed for Vercel)
 
 let notifInterval = null;
+let _chatPollGlobal = null;
+let _lastChatCount = -1;
+let _lastChatId = 0;
 
 function connectSocket() {
-  // Poll notifications every 30 seconds
   updateNotificationCount();
   notifInterval = setInterval(updateNotificationCount, 60000);
+  // Global chat poll — notify when new messages arrive
+  startChatNotifier();
+}
+
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function startChatNotifier() {
+  requestNotifPermission();
+  if (_chatPollGlobal) clearInterval(_chatPollGlobal);
+  // Initial load to set baseline
+  API.getChat().then(msgs => {
+    _lastChatCount = msgs.length;
+    _lastChatId = msgs.length ? msgs[msgs.length - 1].id : 0;
+  }).catch(() => {});
+
+  _chatPollGlobal = setInterval(async () => {
+    // Skip if user is on chat page (it has its own poll)
+    if (window._currentPage === 'chat') return;
+    try {
+      clearCache('/api/chat');
+      const msgs = await API.getChat();
+      if (_lastChatCount < 0) { _lastChatCount = msgs.length; _lastChatId = msgs.length ? msgs[msgs.length - 1].id : 0; return; }
+      if (msgs.length > _lastChatCount) {
+        const newMsgs = msgs.filter(m => m.id > _lastChatId && m.user_id !== window.currentUser?.id);
+        if (newMsgs.length) {
+          const last = newMsgs[newMsgs.length - 1];
+          showToast(`💬 ${last.user_name}: ${last.message.substring(0, 60)}${last.message.length > 60 ? '...' : ''}`);
+          updateChatBadge(newMsgs.length);
+          // Browser notification if permitted
+          if (Notification.permission === 'granted') {
+            new Notification('Profit Code — Chat', { body: `${last.user_name}: ${last.message.substring(0, 100)}`, icon: '/img/icon-192.png' });
+          }
+        }
+      }
+      _lastChatCount = msgs.length;
+      _lastChatId = msgs.length ? msgs[msgs.length - 1].id : 0;
+    } catch {}
+  }, 8000);
+}
+
+function updateChatBadge(count) {
+  const chatLink = document.querySelector('a[data-page="chat"]');
+  if (!chatLink) return;
+  let badge = chatLink.querySelector('.chat-badge');
+  if (count > 0) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'chat-badge';
+      chatLink.appendChild(badge);
+    }
+    badge.textContent = count > 9 ? '9+' : count;
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+// Clear chat badge when entering chat page
+function clearChatBadge() {
+  const badge = document.querySelector('.chat-badge');
+  if (badge) badge.remove();
+  // Reset baseline
+  API.getChat().then(msgs => {
+    _lastChatCount = msgs.length;
+    _lastChatId = msgs.length ? msgs[msgs.length - 1].id : 0;
+  }).catch(() => {});
 }
 
 function disconnectSocket() {

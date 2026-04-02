@@ -1,30 +1,64 @@
 const CHAT_COLORS = ['#7B6CF6','#E84393','#4A90D9','#1DB954','#F5A623','#00CEC9','#E74C3C'];
 let _chatPollInterval = null;
+let _chatRenderedIds = new Set();
 
 window.Pages.chat = async function() {
+  clearChatBadge();
+  _chatRenderedIds = new Set();
   try {
     const messages = await API.getChat();
-    renderChat(messages);
+    renderChatFull(messages);
     setupChatInput();
-    // Poll every 5s
     if (_chatPollInterval) clearInterval(_chatPollInterval);
-    _chatPollInterval = setInterval(async () => {
-      try {
-        clearCache('/api/chat');
-        const msgs = await API.getChat();
-        renderChat(msgs);
-      } catch {}
-    }, 5000);
+    _chatPollInterval = setInterval(pollNewMessages, 4000);
   } catch (err) {
     console.error('Error cargando chat:', err);
   }
 };
 
+async function pollNewMessages() {
+  try {
+    clearCache('/api/chat');
+    const msgs = await API.getChat();
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    let added = false;
+    msgs.forEach(m => {
+      if (!_chatRenderedIds.has(m.id)) {
+        _chatRenderedIds.add(m.id);
+        container.appendChild(buildMsgEl(m));
+        added = true;
+      }
+    });
+    if (added) container.scrollTop = container.scrollHeight;
+  } catch {}
+}
+
 function getChatColor(userId) {
   return CHAT_COLORS[(userId || 0) % CHAT_COLORS.length];
 }
 
-function renderChat(messages) {
+function buildMsgEl(m) {
+  const myId = window.currentUser?.id;
+  const isMine = m.user_id === myId;
+  const color = getChatColor(m.user_id);
+  const time = new Date(m.created_at).toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
+
+  const div = document.createElement('div');
+  div.className = `chat-msg ${isMine ? 'mine' : 'other'}`;
+  div.dataset.msgId = m.id;
+  div.innerHTML = `
+    ${!isMine ? `<div class="chat-avatar" style="background:${color}">${(m.user_name || '?').charAt(0)}</div>` : ''}
+    <div class="chat-bubble ${isMine ? 'mine' : ''}">
+      ${!isMine ? `<div class="chat-name" style="color:${color}">${esc(m.user_name || '?')}</div>` : ''}
+      <div class="chat-text">${esc(m.message)}</div>
+      <div class="chat-time">${time}</div>
+    </div>
+  `;
+  return div;
+}
+
+function renderChatFull(messages) {
   const container = document.getElementById('chat-messages');
   if (!container) return;
 
@@ -33,24 +67,11 @@ function renderChat(messages) {
     return;
   }
 
-  const myId = window.currentUser?.id;
-  container.innerHTML = messages.map(m => {
-    const isMine = m.user_id === myId;
-    const color = getChatColor(m.user_id);
-    const time = new Date(m.created_at).toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
-
-    return `
-      <div class="chat-msg ${isMine ? 'mine' : 'other'}">
-        ${!isMine ? `<div class="chat-avatar" style="background:${color}">${(m.user_name || '?').charAt(0)}</div>` : ''}
-        <div class="chat-bubble ${isMine ? 'mine' : ''}">
-          ${!isMine ? `<div class="chat-name" style="color:${color}">${esc(m.user_name || '?')}</div>` : ''}
-          <div class="chat-text">${esc(m.message)}</div>
-          <div class="chat-time">${time}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
+  container.innerHTML = '';
+  messages.forEach(m => {
+    _chatRenderedIds.add(m.id);
+    container.appendChild(buildMsgEl(m));
+  });
   container.scrollTop = container.scrollHeight;
 }
 
@@ -71,15 +92,20 @@ window.Pages.chat.send = async function() {
   const msg = input.value.trim();
   if (!msg) return;
   input.value = '';
+  input.focus();
   try {
-    clearCache('/api/chat');
-    await API.sendChat(msg);
-    const messages = await API.getChat();
-    renderChat(messages);
+    const result = await API.sendChat(msg);
+    // Append immediately without re-rendering
+    const container = document.getElementById('chat-messages');
+    // Remove empty state if present
+    const empty = container.querySelector('.empty-state');
+    if (empty) empty.remove();
+    if (result && result.id) {
+      _chatRenderedIds.add(result.id);
+      container.appendChild(buildMsgEl(result));
+      container.scrollTop = container.scrollHeight;
+    }
   } catch (err) {
     showToast(err.message);
   }
 };
-
-// Cleanup on page change
-const _origNavigateTo = window._origNavigateTo || null;
