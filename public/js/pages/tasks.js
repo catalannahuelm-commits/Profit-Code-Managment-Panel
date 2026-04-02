@@ -138,7 +138,7 @@ function renderTasks(tasks) {
         </div>
         <div class="task-card-right">
           ${deadlineLabel(tk.deadline, tk.status)}
-          <button class="client-action-btn" onclick="event.stopPropagation();Pages.tasks.delete(${tk.id})" title="${delLabel}">
+          <button class="card-action-btn" onclick="event.stopPropagation();Pages.tasks.delete(${tk.id})" title="${delLabel}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
           <div class="task-status-dropdown" data-task-id="${tk.id}" data-current="${esc(tk.status)}">

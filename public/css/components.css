@@ -4200,6 +4200,42 @@ tr:hover {
   box-shadow: 0 24px 80px rgba(0,0,0,0.15);
 }
 
+/* === CARD ACTION BUTTONS (invisible, appear on hover) === */
+.card-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.project-card:hover .card-actions,
+.client-card:hover .client-actions,
+.task-card:hover .card-actions,
+.inv-card:hover .card-actions,
+.exp-card:hover .card-actions {
+  opacity: 1;
+}
+
+.card-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(123,108,246,0.1);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.card-action-btn:hover {
+  background: rgba(123,108,246,0.2);
+  color: var(--primary);
+}
+
 /* === SEARCH DROPDOWN === */
 .search-dropdown {
   position: absolute;
