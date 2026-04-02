@@ -68,6 +68,28 @@ function renderTeamMembers(workload) {
   }).join('');
 }
 
+window.Pages.team.openInvite = function() {
+  document.getElementById('form-invite').reset();
+  document.getElementById('modal-invite').classList.add('active');
+
+  document.getElementById('form-invite').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await API.inviteEmployee({
+        name: document.getElementById('invite-name').value,
+        email: document.getElementById('invite-email').value,
+        password: document.getElementById('invite-password').value,
+      });
+      document.getElementById('modal-invite').classList.remove('active');
+      clearCache('/api/team');
+      window.Pages.team();
+      showToast(t('team_invited') || 'Miembro invitado');
+    } catch (err) {
+      showToast(err.message);
+    }
+  };
+};
+
 function renderTeamDistribution(workload) {
   const el = document.getElementById('team-distribution');
   if (!el) return;

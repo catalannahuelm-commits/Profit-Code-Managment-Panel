@@ -1,5 +1,34 @@
+<div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+  <button class="btn btn-primary" id="btn-invite" onclick="Pages.team.openInvite()">+ Invitar Miembro</button>
+</div>
+
 <!-- Team member cards -->
 <div id="team-members" class="team-members"></div>
 
 <!-- Task distribution -->
 <div id="team-distribution" class="team-distribution"></div>
+
+<!-- Invite modal -->
+<div class="modal-overlay" id="modal-invite">
+  <div class="modal">
+    <h2>Invitar Miembro</h2>
+    <form id="form-invite">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" id="invite-name" required placeholder="Nombre del miembro">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="invite-email" required placeholder="email@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label>Contraseña inicial</label>
+        <input type="text" id="invite-password" required placeholder="Contraseña temporal" minlength="6">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-invite').classList.remove('active')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Invitar</button>
+      </div>
+    </form>
+  </div>
+</div>

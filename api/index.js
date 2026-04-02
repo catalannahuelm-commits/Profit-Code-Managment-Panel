@@ -146,6 +146,14 @@ module.exports = async (req, res) => {
           const { data } = await supabase.from('projects').update(updates).eq('id', parts[1]).eq('org_id', u.org_id).select().single();
           return res.json(data);
         }
+        if (method === 'DELETE') {
+          const u = ownerOnly(req, res); if (!u) return;
+          await supabase.from('tasks').delete().eq('project_id', parts[1]).eq('org_id', u.org_id);
+          await supabase.from('invoices').delete().eq('project_id', parts[1]).eq('org_id', u.org_id);
+          await supabase.from('expenses').delete().eq('project_id', parts[1]).eq('org_id', u.org_id);
+          await supabase.from('projects').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+          return res.json({ ok: true });
+        }
       }
     }
 
@@ -175,23 +183,36 @@ module.exports = async (req, res) => {
           const { data } = await supabase.from('tasks').update(updates).eq('id', parts[1]).eq('org_id', u.org_id).select().single();
           return res.json(data);
         }
+        if (method === 'DELETE') {
+          const u = ownerOnly(req, res); if (!u) return;
+          await supabase.from('tasks').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+          return res.json({ ok: true });
+        }
       }
     }
 
     // ========== INVOICES & EXPENSES ==========
     if (parts[0] === 'invoices') {
       if (parts[1] === 'expenses') {
-        if (method === 'GET') {
-          const u = ownerOnly(req, res); if (!u) return;
-          const { data } = await supabase.from('expenses').select('*, projects(name)').eq('org_id', u.org_id).order('date', { ascending: false });
-          return res.json((data || []).map(e => ({ ...e, project_name: e.projects?.name, projects: undefined })));
-        }
-        if (method === 'POST') {
-          const u = ownerOnly(req, res); if (!u) return;
-          const { project_id, description, amount, category, date } = req.body;
-          if (!description || !amount) return res.status(400).json({ error: 'Descripción y monto requeridos' });
-          const { data } = await supabase.from('expenses').insert({ project_id, description, amount, category: category || 'other', date: date || new Date().toISOString().split('T')[0], org_id: u.org_id }).select().single();
-          return res.status(201).json(data);
+        if (!parts[2]) {
+          if (method === 'GET') {
+            const u = ownerOnly(req, res); if (!u) return;
+            const { data } = await supabase.from('expenses').select('*, projects(name)').eq('org_id', u.org_id).order('date', { ascending: false });
+            return res.json((data || []).map(e => ({ ...e, project_name: e.projects?.name, projects: undefined })));
+          }
+          if (method === 'POST') {
+            const u = ownerOnly(req, res); if (!u) return;
+            const { project_id, description, amount, category, date } = req.body;
+            if (!description || !amount) return res.status(400).json({ error: 'Descripción y monto requeridos' });
+            const { data } = await supabase.from('expenses').insert({ project_id, description, amount, category: category || 'other', date: date || new Date().toISOString().split('T')[0], org_id: u.org_id }).select().single();
+            return res.status(201).json(data);
+          }
+        } else {
+          if (method === 'DELETE') {
+            const u = ownerOnly(req, res); if (!u) return;
+            await supabase.from('expenses').delete().eq('id', parts[2]).eq('org_id', u.org_id);
+            return res.json({ ok: true });
+          }
         }
       }
       if (!parts[1]) {
@@ -220,6 +241,11 @@ module.exports = async (req, res) => {
           data.client_name = data.clients?.name; data.project_name = data.projects?.name;
           delete data.clients; delete data.projects;
           return res.json(data);
+        }
+        if (method === 'DELETE') {
+          const u = ownerOnly(req, res); if (!u) return;
+          await supabase.from('invoices').delete().eq('id', parts[1]).eq('org_id', u.org_id);
+          return res.json({ ok: true });
         }
       }
     }
@@ -300,6 +326,36 @@ module.exports = async (req, res) => {
           return res.json({ ok: true });
         }
       }
+    }
+
+    // ========== INVITE EMPLOYEE ==========
+    if (parts[0] === 'team' && parts[1] === 'invite' && method === 'POST') {
+      const u = ownerOnly(req, res); if (!u) return;
+      const { name, email, password } = req.body;
+      if (!name || !email || !password) return res.status(400).json({ error: 'Nombre, email y contraseña requeridos' });
+      const { data: existing } = await supabase.from('users').select('id').eq('email', email).limit(1);
+      if (existing?.length) return res.status(400).json({ error: 'Ese email ya está registrado' });
+      const hash = await bcrypt.hash(password, 10);
+      const { data } = await supabase.from('users').insert({ name, email, password_hash: hash, role: 'employee', org_id: u.org_id }).select('id, name, email, role').single();
+      return res.json(data);
+    }
+
+    // ========== SEARCH ==========
+    if (parts[0] === 'search' && method === 'GET') {
+      const u = auth(req, res); if (!u) return;
+      const q = (req.url.split('q=')[1] || '').split('&')[0];
+      if (!q || q.length < 2) return res.json([]);
+      const query = decodeURIComponent(q).toLowerCase();
+      const [clients, projects, tasks] = await Promise.all([
+        supabase.from('clients').select('id, name, company, email').eq('org_id', u.org_id).ilike('name', `%${query}%`).limit(5),
+        supabase.from('projects').select('id, name').eq('org_id', u.org_id).ilike('name', `%${query}%`).limit(5),
+        supabase.from('tasks').select('id, title').eq('org_id', u.org_id).ilike('title', `%${query}%`).limit(5),
+      ]);
+      return res.json([
+        ...(clients.data || []).map(c => ({ type: 'client', id: c.id, label: c.name, sub: c.company || c.email })),
+        ...(projects.data || []).map(p => ({ type: 'project', id: p.id, label: p.name })),
+        ...(tasks.data || []).map(t => ({ type: 'task', id: t.id, label: t.title })),
+      ]);
     }
 
     // ========== NOTIFICATIONS ==========

@@ -93,8 +93,16 @@ function renderProjectCards(projects) {
         <div class="project-client">${esc(p.client_name) || t('no_client')}</div>
         ${p.description ? `<div class="project-desc">${esc(p.description)}</div>` : ''}
 
-        <div class="project-badges">
+        <div class="project-badges" style="display:flex;justify-content:space-between;align-items:center;">
           <span class="badge" style="background:${st.color}15;color:${st.color}">${st.icon} ${st.label}</span>
+          <div style="display:flex;gap:4px;">
+            <button class="client-action-btn" onclick="event.stopPropagation();Pages.projects.openEdit(${p.id})" title="${t('edit')}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="client-action-btn" onclick="event.stopPropagation();Pages.projects.delete(${p.id})" title="${t('delete')}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="progress-section">
@@ -137,6 +145,44 @@ function renderProjectCards(projects) {
     `;
   }).join('');
 }
+
+window.Pages.projects.delete = async function(id) {
+  if (!confirm(t('confirm_delete'))) return;
+  await API.deleteProject(id);
+  clearCache('/api/projects');
+  window.Pages.projects();
+};
+
+window.Pages.projects.openEdit = async function(id) {
+  const p = _allProjects.find(pr => pr.id === id);
+  if (!p) return;
+  const clients = await API.getClients();
+  const select = document.getElementById('project-client');
+  select.innerHTML = `<option value="">${t('projects_select_client')}</option>` +
+    clients.map(c => `<option value="${c.id}" ${c.id == p.client_id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  document.getElementById('project-name').value = p.name || '';
+  document.getElementById('project-description').value = p.description || '';
+  document.getElementById('project-budget').value = p.budget || 0;
+  document.getElementById('project-deadline').value = p.deadline || '';
+  document.getElementById('modal-project').classList.add('active');
+  upgradeSelects(document.getElementById('modal-project'));
+  initDatePickers(document.getElementById('modal-project'));
+
+  document.getElementById('form-project').onsubmit = async (e) => {
+    e.preventDefault();
+    await API.updateProject(id, {
+      client_id: document.getElementById('project-client').value,
+      name: document.getElementById('project-name').value,
+      description: document.getElementById('project-description').value,
+      budget: parseFloat(document.getElementById('project-budget').value) || 0,
+      deadline: document.getElementById('project-deadline').value || null,
+    });
+    document.getElementById('modal-project').classList.remove('active');
+    document.getElementById('form-project').reset();
+    clearCache('/api/projects');
+    window.Pages.projects();
+  };
+};
 
 window.Pages.projects.openNew = async function() {
   const clients = await API.getClients();

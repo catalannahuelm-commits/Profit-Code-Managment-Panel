@@ -3,7 +3,7 @@
 window.currentUser = null;
 window._currentPage = null;
 const _pageCache = {};
-const _appVersion = '13';
+const _appVersion = '14';
 
 const ICONS = {
   dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -190,6 +190,64 @@ async function navigateTo(page) {
       </div>`;
   }
 }
+
+// Global search
+(function() {
+  const searchInput = document.querySelector('.header-search input');
+  if (!searchInput) return;
+  let searchTimer = null;
+  let searchDropdown = null;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 2) { closeSearchDropdown(); return; }
+    searchTimer = setTimeout(async () => {
+      try {
+        const results = await API.search(q);
+        showSearchResults(results);
+      } catch {}
+    }, 300);
+  });
+
+  searchInput.addEventListener('blur', () => setTimeout(closeSearchDropdown, 200));
+
+  function showSearchResults(results) {
+    closeSearchDropdown();
+    if (!results.length) return;
+
+    searchDropdown = document.createElement('div');
+    searchDropdown.className = 'search-dropdown';
+    const icons = { client: '👤', project: '📁', task: '✅' };
+    const pages = { client: 'clients', project: 'projects', task: 'tasks' };
+
+    searchDropdown.innerHTML = results.map(r => `
+      <div class="search-result-item" data-page="${pages[r.type]}">
+        <span class="search-result-icon">${icons[r.type]}</span>
+        <div>
+          <div class="search-result-label">${esc(r.label)}</div>
+          ${r.sub ? `<div class="search-result-sub">${esc(r.sub)}</div>` : ''}
+        </div>
+        <span class="search-result-type">${r.type}</span>
+      </div>
+    `).join('');
+
+    searchDropdown.querySelectorAll('.search-result-item').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        navigateTo(item.dataset.page);
+        searchInput.value = '';
+        closeSearchDropdown();
+      });
+    });
+
+    searchInput.parentElement.appendChild(searchDropdown);
+  }
+
+  function closeSearchDropdown() {
+    if (searchDropdown) { searchDropdown.remove(); searchDropdown = null; }
+  }
+})();
 
 // Sidebar tooltips
 function setupSidebarTooltips(container) {

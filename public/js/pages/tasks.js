@@ -137,6 +137,9 @@ function renderTasks(tasks) {
         </div>
         <div class="task-card-right">
           ${deadlineLabel(t.deadline, t.status)}
+          <button class="meeting-delete-btn" onclick="event.stopPropagation();Pages.tasks.delete(${t.id})" title="${window.t ? t('delete') : 'Eliminar'}" style="opacity:0.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
           <div class="task-status-dropdown" data-task-id="${t.id}" data-current="${esc(t.status)}">
             <button class="task-status-btn" style="--status-color: ${current.color}">
               <span class="task-status-dot" style="background: ${current.color}"></span>
@@ -209,6 +212,13 @@ async function updateTaskStatus(taskId, status) {
     window.Pages.tasks();
   }
 }
+
+window.Pages.tasks.delete = async function(id) {
+  if (!confirm(t('confirm_delete'))) return;
+  await API.deleteTask(id);
+  clearCache('/api/tasks');
+  window.Pages.tasks();
+};
 
 window.Pages.tasks.openNew = async function() {
   const [projects, users] = await Promise.all([

@@ -69,6 +69,12 @@ const API = {
     return this.request('GET', '/api/auth/me');
   },
 
+  // Search
+  search(q) { return this.request('GET', `/api/search?q=${encodeURIComponent(q)}`); },
+
+  // Team invite
+  inviteEmployee(data) { return this.request('POST', '/api/team/invite', data); },
+
   // Clients
   getClients() { return this.request('GET', '/api/clients'); },
   getClient(id) { return this.request('GET', `/api/clients/${id}`); },
@@ -81,12 +87,14 @@ const API = {
   getProject(id) { return this.request('GET', `/api/projects/${id}`); },
   createProject(data) { return this.request('POST', '/api/projects', data); },
   updateProject(id, data) { return this.request('PUT', `/api/projects/${id}`, data); },
+  deleteProject(id) { return this.request('DELETE', `/api/projects/${id}`); },
 
   // Tasks
   getTasks() { return this.request('GET', '/api/tasks'); },
   getMyTasks() { return this.request('GET', '/api/tasks/mine'); },
   createTask(data) { return this.request('POST', '/api/tasks', data); },
   updateTask(id, data) { return this.request('PUT', `/api/tasks/${id}`, data); },
+  deleteTask(id) { return this.request('DELETE', `/api/tasks/${id}`); },
 
   // Task Comments
   getComments(taskId) { return this.request('GET', `/api/tasks/${taskId}/comments`); },
@@ -96,10 +104,12 @@ const API = {
   getInvoices() { return this.request('GET', '/api/invoices'); },
   createInvoice(data) { return this.request('POST', '/api/invoices', data); },
   updateInvoice(id, data) { return this.request('PUT', `/api/invoices/${id}`, data); },
+  deleteInvoice(id) { return this.request('DELETE', `/api/invoices/${id}`); },
 
   // Expenses
   getExpenses() { return this.request('GET', '/api/invoices/expenses'); },
   createExpense(data) { return this.request('POST', '/api/invoices/expenses', data); },
+  deleteExpense(id) { return this.request('DELETE', `/api/invoices/expenses/${id}`); },
 
   // Dashboard
   getDashboard() { return this.request('GET', '/api/dashboard'); },

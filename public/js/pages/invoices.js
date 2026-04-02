@@ -154,12 +154,17 @@ function renderInvoices(invoices) {
             ${invDeadlineLabel(inv.due_date, inv.status)}
             ${inv.status === 'paid' && inv.paid_date ? `<span class="inv-paid-date"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> ${t('invoices_collected_on', { date: esc(inv.paid_date) })}</span>` : ''}
           </div>
-          ${inv.status !== 'paid' ? `
-            <button class="inv-pay-btn" onclick="event.stopPropagation(); markAsPaid(${inv.id})">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-              ${t('invoices_collect')}
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${inv.status !== 'paid' ? `
+              <button class="inv-pay-btn" onclick="event.stopPropagation(); markAsPaid(${inv.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                ${t('invoices_collect')}
+              </button>
+            ` : ''}
+            <button class="meeting-delete-btn" style="opacity:1" onclick="event.stopPropagation();Pages.invoices.delete(${inv.id})" title="${t('delete')}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
-          ` : ''}
+          </div>
         </div>
       </div>
     </div>`;
@@ -180,6 +185,13 @@ async function markAsPaid(id) {
     alert('Error al actualizar la factura: ' + err.message);
   }
 }
+
+window.Pages.invoices.delete = async function(id) {
+  if (!confirm(t('confirm_delete'))) return;
+  await API.deleteInvoice(id);
+  clearCache('/api/invoices');
+  window.Pages.invoices();
+};
 
 window.Pages.invoices.openNew = async function() {
   const projects = await API.getProjects();
