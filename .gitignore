@@ -7,6 +7,5 @@ data/*.db-wal
 .env.*.local
 .vercel
 n8n-data/
-public/img/*.mp4
 
 .vercel
