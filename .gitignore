@@ -9,3 +9,5 @@ data/*.db-wal
 n8n-data/
 
 .vercel
+
+.vercel
