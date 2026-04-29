@@ -3,7 +3,10 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 .env
+.env.production
+.env.*.local
 .vercel
 n8n-data/
+public/img/*.mp4
 
 .vercel

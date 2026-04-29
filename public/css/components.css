@@ -545,6 +545,82 @@
 }
 
 /* === CLIENT CARDS === */
+.clients-view-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.clients-view-tabs .view-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.clients-view-tabs .view-tab:hover {
+  background: rgba(123, 108, 246, 0.06);
+  color: var(--text);
+}
+.clients-view-tabs .view-tab.active {
+  background: rgba(123, 108, 246, 0.14);
+  border-color: rgba(123, 108, 246, 0.4);
+  color: var(--text);
+}
+.clients-view-tabs .view-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 99px;
+  background: rgba(123, 108, 246, 0.18);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.clients-view-tabs .view-tab.active .view-tab-count {
+  background: #7B6CF6;
+  color: #fff;
+}
+
+.client-card-lead {
+  border-color: rgba(245, 166, 35, 0.45) !important;
+  box-shadow: 0 4px 24px rgba(245, 166, 35, 0.10);
+}
+.lead-badge {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba(245, 166, 35, 0.15);
+  color: #F5A623;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.lead-message {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(123, 108, 246, 0.06);
+  border-left: 3px solid rgba(245, 166, 35, 0.6);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-height: 6.5em;
+  overflow: hidden;
+  position: relative;
+}
+
 .clients-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

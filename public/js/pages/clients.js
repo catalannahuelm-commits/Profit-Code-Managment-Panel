@@ -1,6 +1,38 @@
 let _allClients = [];
+let _clientsView = 'attend'; // 'attend' | 'all'
+let _clientsViewLocked = false; // true cuando el usuario eligió manualmente la vista
+let _clientsSearch = '';
 
 const AVATAR_COLORS = ['#4A90D9', '#00B894', '#E84393', '#F39C12', '#6C5CE7', '#E74C3C', '#00CEC9', '#636E72'];
+
+function isPending(c) {
+  return c.source === 'landing' && c.pipeline_stage === 'lead';
+}
+
+function applyClientsView() {
+  const q = _clientsSearch.toLowerCase();
+  let list = _allClients;
+  if (_clientsView === 'attend') list = list.filter(isPending);
+  if (q) {
+    list = list.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      (c.company && c.company.toLowerCase().includes(q)) ||
+      (c.email && c.email.toLowerCase().includes(q))
+    );
+  }
+  renderClientCards(list);
+  updateViewCounts();
+}
+
+function updateViewCounts() {
+  const attendEl = document.getElementById('view-count-attend');
+  const allEl = document.getElementById('view-count-all');
+  if (attendEl) attendEl.textContent = _allClients.filter(isPending).length;
+  if (allEl) allEl.textContent = _allClients.length;
+  document.querySelectorAll('.clients-view-tabs .view-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === _clientsView);
+  });
+}
 
 function getStageConfig() {
   return {
@@ -19,8 +51,12 @@ window.Pages.clients = async function() {
   if (kpis && !kpis.children.length) kpis.innerHTML = '<div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div>';
   try {
     _allClients = await API.getClients();
+    // Vista por defecto: 'attend' si hay leads, 'all' si no. Una vez que el usuario eligió, no la cambiamos.
+    if (!_clientsViewLocked) {
+      _clientsView = _allClients.some(isPending) ? 'attend' : 'all';
+    }
     renderClientsKPIs(_allClients);
-    renderClientCards(_allClients);
+    applyClientsView();
     // Update static text
     const searchInput = document.getElementById('clients-search');
     if (searchInput) searchInput.placeholder = t('clients_search_ph');
@@ -32,26 +68,27 @@ window.Pages.clients = async function() {
 };
 
 window.Pages.clients.filter = function(query) {
-  const q = query.toLowerCase();
-  const filtered = _allClients.filter(c =>
-    c.name.toLowerCase().includes(q) ||
-    (c.company && c.company.toLowerCase().includes(q)) ||
-    (c.email && c.email.toLowerCase().includes(q))
-  );
-  renderClientCards(filtered);
+  _clientsSearch = query || '';
+  applyClientsView();
+};
+
+window.Pages.clients.setView = function(view) {
+  _clientsView = view;
+  _clientsViewLocked = true;
+  applyClientsView();
 };
 
 function renderClientsKPIs(clients) {
   const container = document.getElementById('clients-kpis');
   const active = clients.filter(c => c.pipeline_stage !== 'paid').length;
-  const leads = clients.filter(c => c.pipeline_stage === 'lead').length;
+  const pending = clients.filter(isPending).length;
   const dev = clients.filter(c => c.pipeline_stage === 'development').length;
 
   const kpis = [
     { label: t('clients_total'), value: clients.length, color: '#7B6CF6' },
     { label: t('clients_active'), value: active, color: '#1DB954' },
-    { label: t('clients_leads'), value: leads, color: '#4A90D9' },
-    { label: t('clients_in_dev'), value: dev, color: '#F5A623' },
+    { label: 'Por atender', value: pending, color: '#F5A623' },
+    { label: t('clients_in_dev'), value: dev, color: '#4A90D9' },
   ];
 
   container.innerHTML = kpis.map((k, i) => `
@@ -81,9 +118,12 @@ function renderClientCards(clients) {
     const initial = c.name.charAt(0).toUpperCase();
     const color = getAvatarColor(c.name);
     const stage = stages[c.pipeline_stage] || { label: c.pipeline_stage, color: '#7B6CF6' };
+    const fromLanding = c.source === 'landing';
+    const leadMsg = fromLanding && c.notes ? c.notes.replace(/^\[Landing\]\s*/, '') : '';
 
     return `
-      <div class="client-card" style="animation-delay:${i * 40}ms">
+      <div class="client-card${fromLanding ? ' client-card-lead' : ''}" style="animation-delay:${i * 40}ms">
+        ${fromLanding ? `<div class="lead-badge">🌐 Nuevo desde landing</div>` : ''}
         <div class="client-card-header">
           <div class="client-avatar" style="background:${color}">${initial}</div>
           <div>
@@ -91,6 +131,8 @@ function renderClientCards(clients) {
             ${c.company ? `<div class="client-contact">${esc(c.company)}</div>` : ''}
           </div>
         </div>
+
+        ${leadMsg ? `<div class="lead-message">${esc(leadMsg)}</div>` : ''}
 
         ${c.email ? `
           <div class="client-detail">

@@ -40,7 +40,56 @@ module.exports = async (req, res) => {
   const parts = parsePath(req.url);
   const method = req.method;
 
+  // CORS para endpoints públicos (form de la landing)
+  if (parts[0] === 'leads') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (method === 'OPTIONS') return res.status(204).end();
+  }
+
   try {
+    // ========== LEADS (PÚBLICO — desde landing) ==========
+    if (parts[0] === 'leads' && method === 'POST') {
+      const orgId = parseInt(process.env.LANDING_ORG_ID);
+      if (!orgId) return res.status(500).json({ error: 'LANDING_ORG_ID no configurado' });
+
+      const { name, company, email, kind, msg } = req.body || {};
+      if (!name || !email || !msg) return res.status(400).json({ error: 'Nombre, email y mensaje son requeridos' });
+
+      // honeypot/longitud básica
+      if (String(name).length > 200 || String(email).length > 200 || String(msg).length > 5000) {
+        return res.status(400).json({ error: 'Datos demasiado largos' });
+      }
+
+      const notes = `[Landing] ${kind ? `Tipo: ${kind}\n` : ''}${msg}`;
+      const { data, error } = await supabase.from('clients').insert({
+        name: String(name).slice(0, 200),
+        company: company ? String(company).slice(0, 200) : null,
+        email: String(email).slice(0, 200),
+        notes,
+        pipeline_stage: 'lead',
+        source: 'landing',
+        org_id: orgId,
+      }).select().single();
+      if (error) { console.error('Error insertando lead:', error); return res.status(500).json({ error: 'No se pudo guardar' }); }
+
+      // Notificar al equipo (email al owner + slack), no bloqueante
+      try {
+        const { data: owners } = await supabase.from('users').select('email').eq('org_id', orgId).eq('role', 'owner').limit(1);
+        if (owners?.[0]?.email) {
+          notifyEmail(owners[0].email, `🌐 Nuevo lead desde la landing: ${name}`,
+            `<p style="color:#c4c4d4;">Llegó una nueva consulta desde el formulario de contacto.</p>
+             <p style="color:#fff;"><strong>${name}</strong>${company ? ` — ${company}` : ''}<br/><span style="color:#8888a8;">${email}</span></p>
+             ${kind ? `<p style="color:#8888a8;">Tipo: ${kind}</p>` : ''}
+             <p style="color:#c4c4d4;white-space:pre-wrap;">${String(msg).replace(/</g, '&lt;')}</p>`);
+        }
+        notifySlack(orgId, `🌐 Nuevo lead de la landing: *${name}*${company ? ` (${company})` : ''} — ${email}`);
+      } catch {}
+
+      return res.status(201).json({ ok: true, id: data.id });
+    }
+
     // ========== AUTH ==========
     if (parts[0] === 'auth') {
       if (parts[1] === 'login' && method === 'POST') {

@@ -5,6 +5,17 @@
 
   <div class="clients-kpi-grid" id="clients-kpis"></div>
 
+  <div class="clients-view-tabs" id="clients-view-tabs">
+    <button class="view-tab active" data-view="attend" onclick="Pages.clients.setView('attend')">
+      <span>Por atender</span>
+      <span class="view-tab-count" id="view-count-attend">0</span>
+    </button>
+    <button class="view-tab" data-view="all" onclick="Pages.clients.setView('all')">
+      <span>Todos</span>
+      <span class="view-tab-count" id="view-count-all">0</span>
+    </button>
+  </div>
+
   <div class="search-bar">
     <span class="search-icon">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
